@@ -108,6 +108,7 @@ td.edited{background:rgba(251,191,36,.1)!important}
 <button class="btn btn-primary" id="btnAdd" onclick="openAddModal()" disabled style="opacity:.5">＋ 新增记录</button>
 <button class="btn btn-success" id="btnSave" onclick="saveAll()" disabled style="opacity:.5">💾 保存数据</button>
 <button class="btn btn-secondary" onclick="changePassword()" style="font-size:12px">🔑 修改密码</button>
+<button class="btn btn-secondary" onclick="downloadUpdatedHTML()" style="font-size:12px">📦 下载更新版HTML</button>
 </div>
 </div>
 <div class="tabs">
@@ -348,6 +349,28 @@ function changePassword() {
   }
   setPasswordHash(sha256(newPwd));
   toast('🔐 密码已更新');
+}
+
+function downloadUpdatedHTML() {
+  // Get the current page HTML source
+  let html = document.documentElement.outerHTML;
+  // Replace the embedded allData with current data (including localStorage edits)
+  const dataStr = JSON.stringify(allData);
+  // The original data is embedded as: let allData = [...];
+  // Find and replace it
+  const regex = /let allData = \[.*?\];/s;
+  if (regex.test(html)) {
+    html = html.replace(regex, 'let allData = ' + dataStr + ';');
+  }
+  // Download
+  const blob = new Blob(['<!DOCTYPE html>\n' + html.substring(html.indexOf('<html'))], {type: 'text/html;charset=utf-8'});
+  const url = URL.createObjectURL(blob);
+  const a = document.createElement('a');
+  a.href = url;
+  a.download = 'stamping_dashboard.html';
+  a.click();
+  URL.revokeObjectURL(url);
+  toast('📦 更新版HTML已下载，请替换本地文件后运行同步脚本');
 }
 
 function saveToStorage() {
