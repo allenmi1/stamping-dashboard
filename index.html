@@ -107,7 +107,7 @@ td.edited{background:rgba(251,191,36,.1)!important}
 <button class="btn btn-primary" id="btnAdd" onclick="openAddModal()" disabled="" style="opacity:.5">＋ 新增记录</button>
 <button class="btn btn-success" id="btnSave" onclick="saveAll()" disabled="" style="opacity:.5">💾 保存数据</button>
 <button class="btn btn-secondary" onclick="changePassword()" style="font-size:12px">🔑 修改密码</button>
-<button class="btn btn-secondary" onclick="downloadUpdatedHTML()" style="font-size:12px">📦 下载更新版HTML</button>
+<button class="btn btn-secondary" id="btnPublish" onclick="publishToGitHub()" disabled style="opacity:.5;font-size:12px">🚀 发布到网站</button>
 </div>
 </div>
 <div class="tabs">
@@ -183,7 +183,7 @@ FX11-A2-G</td><td>220</td><td>右前门内板
 </div>
 </div>
 
-<div class="toast" id="toast" style="display: none;">📦 更新版HTML已下载，请替换本地文件后运行同步脚本</div>
+<div class="toast" id="toast"></div>
 
 <script>
 const COLUMNS = ["车型", "PSS", "零件名称", "零件件号_变更前", "零件件号_变更后", "钢板物料编码", "钢板物料名称", "钢厂", "代理商编码", "加工方式", "品类", "料片形状", "牌号", "表面质量", "表面处理", "厚度_mm", "宽度_mm", "上长度_mm", "下长度_mm", "板料用量_PCS", "理论板料重量", "理论零件重量", "称重板料重量", "称重零件重量", "大宗系统维护", "备注"];
@@ -324,22 +324,21 @@ function updateLockUI() {
   const btn = document.getElementById('lockBtn');
   const addBtn = document.getElementById('btnAdd');
   const saveBtn = document.getElementById('btnSave');
+  const pubBtn = document.getElementById('btnPublish');
   if (isUnlocked) {
     btn.className = 'lock-btn unlocked';
     btn.innerHTML = '🔓 编辑模式';
     btn.title = '点击锁定';
-    addBtn.disabled = false;
-    addBtn.style.opacity = '1';
-    saveBtn.disabled = false;
-    saveBtn.style.opacity = '1';
+    addBtn.disabled = false; addBtn.style.opacity = '1';
+    saveBtn.disabled = false; saveBtn.style.opacity = '1';
+    if (pubBtn) { pubBtn.disabled = false; pubBtn.style.opacity = '1'; }
   } else {
     btn.className = 'lock-btn locked';
     btn.innerHTML = '🔒 只读模式';
     btn.title = '点击解锁以编辑数据';
-    addBtn.disabled = true;
-    addBtn.style.opacity = '0.5';
-    saveBtn.disabled = true;
-    saveBtn.style.opacity = '0.5';
+    addBtn.disabled = true; addBtn.style.opacity = '0.5';
+    saveBtn.disabled = true; saveBtn.style.opacity = '0.5';
+    if (pubBtn) { pubBtn.disabled = true; pubBtn.style.opacity = '0.5'; }
   }
 }
 
@@ -363,26 +362,54 @@ function changePassword() {
   toast('🔐 密码已更新');
 }
 
-function downloadUpdatedHTML() {
-  // Get the current page HTML source
-  let html = document.documentElement.outerHTML;
-  // Replace the embedded allData with current data (including localStorage edits)
-  const dataStr = JSON.stringify(allData);
-  // The original data is embedded as: let allData = [...];
-  // Find and replace it
-  const regex = /let allData = \[.*?\];/s;
-  if (regex.test(html)) {
-    html = html.replace(regex, 'let allData = ' + dataStr + ';');
-  }
-  // Download
-  const blob = new Blob(['<!DOCTYPE html>\n' + html.substring(html.indexOf('<html'))], {type: 'text/html;charset=utf-8'});
-  const url = URL.createObjectURL(blob);
-  const a = document.createElement('a');
-  a.href = url;
-  a.download = 'stamping_dashboard.html';
-  a.click();
-  URL.revokeObjectURL(url);
-  toast('📦 更新版HTML已下载，请替换本地文件后运行同步脚本');
+function publishToGitHub() {
+  if (!isUnlocked) { requireAuth(publishToGitHub); return; }
+  const GH_TOKEN = 'ghp_Aa…C8bO';
+  const GH_OWNER = 'allenmi1';
+  const GH_REPO = 'stamping-dashboard';
+  const btn = document.getElementById('btnPublish');
+  btn.disabled = true; btn.textContent = '⏳ 发布中...';
+  
+  // Step 1: Get current SHA
+  fetch(`https://api.github.com/repos/${GH_OWNER}/${GH_REPO}/contents/index.html`, {
+    headers: { 'Authorization': `Bearer ${GH_TOKEN}', 'Accept': 'application/vnd.github+json' }
+  })
+  .then(r => r.json())
+  .then(data => {
+    if (!data.sha) throw new Error('无法获取远程文件信息');
+    const sha = data.sha;
+    
+    // Step 2: Build updated HTML with current data
+    let html = document.documentElement.outerHTML;
+    const dataStr = JSON.stringify(allData);
+    const regex = /let allData = \[.*?\];/s;
+    if (regex.test(html)) {
+      html = html.replace(regex, 'let allData = ' + dataStr + ';');
+    }
+    html = '<!DOCTYPE html>\n' + html.substring(html.indexOf('<html'));
+    const b64 = btoa(unescape(encodeURIComponent(html)));
+    
+    // Step 3: Upload to GitHub
+    return fetch(`https://api.github.com/repos/${GH_OWNER}/${GH_REPO}/contents/index.html`, {
+      method: 'PUT',
+      headers: { 'Authorization': `Bearer ${GH_TOKEN}', 'Accept': 'application/vnd.github+json', 'Content-Type': 'application/json' },
+      body: JSON.stringify({ message: 'Update dashboard', content: b64, sha: sha, branch: 'main' })
+    });
+  })
+  .then(r => r.json())
+  .then(data => {
+    if (data.content) {
+      toast('🚀 发布成功! 30秒后刷新网站即可看到更新');
+      btn.textContent = '✅ 已发布';
+      setTimeout(() => { btn.textContent = '🚀 发布到网站'; btn.disabled = false; }, 3000);
+    } else {
+      throw new Error(data.message || '发布失败');
+    }
+  })
+  .catch(err => {
+    toast('发布失败: ' + err.message, true);
+    btn.textContent = '🚀 发布到网站'; btn.disabled = false;
+  });
 }
 
 function saveToStorage() {
