@@ -107,7 +107,8 @@ td.edited{background:rgba(251,191,36,.1)!important}
 <button class="btn btn-primary" id="btnAdd" onclick="openAddModal()" disabled="" style="opacity:.5">＋ 新增记录</button>
 <button class="btn btn-success" id="btnSave" onclick="saveAll()" disabled="" style="opacity:.5">💾 保存数据</button>
 <button class="btn btn-secondary" onclick="changePassword()" style="font-size:12px">🔑 修改密码</button>
-<button class="btn btn-secondary" id="btnPublish" onclick="downloadUpdatedHTML()" disabled style="opacity:.5;font-size:12px">📦 下载更新版HTML</button>
+<button class="btn btn-secondary" id="btnPublish" onclick="publishToGitHub()" disabled style="opacity:.5;font-size:12px">🚀 发布到网站</button>
+<button class="btn btn-secondary" onclick="setupGitHubToken()" style="font-size:12px">⚙️ 设置Token</button>
 </div>
 </div>
 <div class="tabs">
@@ -362,23 +363,71 @@ function changePassword() {
   toast('🔐 密码已更新');
 }
 
-function downloadUpdatedHTML() {
-  if (!isUnlocked) { requireAuth(downloadUpdatedHTML); return; }
-  let html = document.documentElement.outerHTML;
-  const dataStr = JSON.stringify(allData);
-  const regex = /let allData = \[.*?\];/s;
-  if (regex.test(html)) {
-    html = html.replace(regex, 'let allData = ' + dataStr + ';');
+function setupGitHubToken() {
+  const current = localStorage.getItem('gh_pat') || '';
+  const token = prompt('请输入 GitHub Personal Access Token（需勾选 repo 权限）:\n\n当前 Token: ' + (current ? current.substring(0,7) + '...' + current.substring(current.length-4) : '未设置'), current);
+  if (token && token.length > 20) {
+    localStorage.setItem('gh_pat', token);
+    toast('✅ Token 已保存');
+  } else if (token === '') {
+    localStorage.removeItem('gh_pat');
+    toast('🗑 Token 已清除');
   }
-  html = '<!DOCTYPE html>\n' + html.substring(html.indexOf('<html'));
-  const blob = new Blob([html], {type: 'text/html;charset=utf-8'});
-  const url = URL.createObjectURL(blob);
-  const a = document.createElement('a');
-  a.href = url;
-  a.download = 'stamping_dashboard.html';
-  a.click();
-  URL.revokeObjectURL(url);
-  toast('📦 已下载! 请替换 C:\\Users\\tao.yang59\\.openclaw\\workspace\\stamping_dashboard.html 后双击一键同步到网站.bat');
+}
+
+function publishToGitHub() {
+  if (!isUnlocked) { requireAuth(publishToGitHub); return; }
+  const GH_TOKEN = localStorage.getItem('gh_pat');
+  if (!GH_TOKEN) {
+    toast('⚠️ 请先点击「⚙️ 设置Token」输入 GitHub Token', true);
+    setupGitHubToken();
+    return;
+  }
+  const GH_OWNER = 'allenmi1';
+  const GH_REPO = 'stamping-dashboard';
+  const btn = document.getElementById('btnPublish');
+  btn.disabled = true; btn.textContent = '⏳ 发布中...';
+  
+  // Step 1: Get current SHA from GitHub
+  fetch('https://api.github.com/repos/' + GH_OWNER + '/' + GH_REPO + '/contents/index.html', {
+    headers: { 'Authorization': 'Bearer ' + GH_TOKEN, 'Accept': 'application/vnd.github+json' }
+  })
+  .then(r => r.json())
+  .then(data => {
+    if (!data.sha) throw new Error('无法获取远程文件: ' + JSON.stringify(data).substring(0,100));
+    const sha = data.sha;
+    
+    // Step 2: Build updated HTML with current localStorage data
+    let html = document.documentElement.outerHTML;
+    const dataStr = JSON.stringify(allData);
+    const regex = /let allData = \[.*?\];/s;
+    if (regex.test(html)) {
+      html = html.replace(regex, 'let allData = ' + dataStr + ';');
+    }
+    html = '<!DOCTYPE html>\n' + html.substring(html.indexOf('<html'));
+    const b64 = btoa(unescape(encodeURIComponent(html)));
+    
+    // Step 3: Upload to GitHub
+    return fetch('https://api.github.com/repos/' + GH_OWNER + '/' + GH_REPO + '/contents/index.html', {
+      method: 'PUT',
+      headers: { 'Authorization': 'Bearer ' + GH_TOKEN, 'Accept': 'application/vnd.github+json', 'Content-Type': 'application/json' },
+      body: JSON.stringify({ message: 'Update dashboard', content: b64, sha: sha, branch: 'main' })
+    });
+  })
+  .then(r => r.json())
+  .then(data => {
+    if (data.content) {
+      toast('🚀 发布成功! 30秒后刷新网站即可看到更新');
+      btn.textContent = '✅ 已发布';
+      setTimeout(() => { btn.textContent = '🚀 发布到网站'; btn.disabled = false; }, 3000);
+    } else {
+      throw new Error(data.message || '发布失败');
+    }
+  })
+  .catch(err => {
+    toast('❌ 发布失败: ' + err.message, true);
+    btn.textContent = '🚀 发布到网站'; btn.disabled = false;
+  });
 }
 
 function saveToStorage() {
