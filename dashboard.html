@@ -1,0 +1,877 @@
+<!DOCTYPE html>
+<html lang="zh-CN"><head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>宝鸡基地冲压主料消耗定额明细表</title>
+<script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.7/dist/chart.umd.min.js">
+</script>
+<style>
+:root{--bg:#0f172a;--bg2:#1e293b;--bg3:#334155;--text:#e2e8f0;--text2:#94a3b8;--accent:#38bdf8;--accent2:#818cf8;--accent3:#34d399;--accent4:#fbbf24;--danger:#f87171;--border:#334155;--card:#1e293b;--shadow:0 4px 24px rgba(0,0,0,.3);--radius:12px;--transition:.2s cubic-bezier(.4,0,.2,1)}
+*{margin:0;padding:0;box-sizing:border-box}
+body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI','PingFang SC','Microsoft YaHei',sans-serif;background:var(--bg);color:var(--text);min-height:100vh;overflow-x:hidden}
+body::before{content:'';position:fixed;inset:0;background:radial-gradient(ellipse 80% 50% at 50% -20%,rgba(56,189,248,.08),transparent),radial-gradient(ellipse 60% 40% at 80% 80%,rgba(129,140,248,.06),transparent);pointer-events:none;z-index:0}
+.app{position:relative;z-index:1;max-width:100%;padding:20px}
+.header{display:flex;align-items:center;justify-content:space-between;padding:20px 28px;background:var(--card);border-radius:var(--radius);box-shadow:var(--shadow);margin-bottom:20px;flex-wrap:wrap;gap:12px;border:1px solid var(--border)}
+.header h1{font-size:1.4rem;font-weight:700;background:linear-gradient(135deg,var(--accent),var(--accent2));-webkit-background-clip:text;-webkit-text-fill-color:transparent}
+.header .meta{display:flex;gap:12px;align-items:center;flex-wrap:wrap}
+.btn{padding:8px 16px;border:none;border-radius:8px;cursor:pointer;font-size:13px;font-weight:600;transition:var(--transition);display:inline-flex;align-items:center;gap:6px;white-space:nowrap}
+.btn-primary{background:var(--accent);color:#0f172a}.btn-primary:hover{background:#7dd3fc;transform:translateY(-1px)}
+.btn-secondary{background:var(--bg3);color:var(--text)}.btn-secondary:hover{background:#475569}
+.btn-danger{background:var(--danger);color:#fff}.btn-success{background:var(--accent3);color:#0f172a}
+.btn-sm{padding:5px 10px;font-size:12px}
+.tabs{display:flex;gap:4px;margin-bottom:20px;background:var(--card);padding:4px;border-radius:var(--radius);border:1px solid var(--border)}
+.tab{flex:1;padding:12px 20px;border:none;background:none;color:var(--text2);cursor:pointer;font-size:14px;font-weight:600;border-radius:10px;transition:var(--transition);text-align:center}
+.tab.active{background:var(--accent);color:#0f172a}
+.tab:hover:not(.active){color:var(--text);background:var(--bg3)}
+.toolbar{display:flex;gap:10px;margin-bottom:16px;flex-wrap:wrap;align-items:center;background:var(--card);padding:16px;border-radius:var(--radius);border:1px solid var(--border)}
+.search-box{flex:1;min-width:200px;padding:9px 14px;border:1px solid var(--border);border-radius:8px;background:var(--bg);color:var(--text);font-size:13px;outline:none;transition:var(--transition)}
+.search-box:focus{border-color:var(--accent);box-shadow:0 0 0 3px rgba(56,189,248,.1)}
+select{padding:9px 14px;border:1px solid var(--border);border-radius:8px;background:var(--bg);color:var(--text);font-size:13px;outline:none;cursor:pointer}
+.table-wrap{background:var(--card);border-radius:var(--radius);overflow:auto;box-shadow:var(--shadow);border:1px solid var(--border);max-height:70vh}
+table{width:100%;border-collapse:collapse;font-size:12px;min-width:2400px}
+th{background:var(--bg3);padding:10px 8px;text-align:left;font-weight:700;color:var(--accent);white-space:nowrap;position:sticky;top:0;z-index:2;cursor:pointer;user-select:none;font-size:11px}
+th:hover{background:#475569}
+td{padding:8px;border-bottom:1px solid rgba(51,65,85,.5);white-space:nowrap;max-width:200px;overflow:hidden;text-overflow:ellipsis}
+tr:hover td{background:rgba(56,189,248,.04)}
+td[contenteditable]{outline:none;border-radius:4px;transition:var(--transition)}
+td[contenteditable]:focus{background:rgba(56,189,248,.1);box-shadow:inset 0 0 0 2px var(--accent);z-index:1;position:relative}
+td.edited{background:rgba(251,191,36,.1)!important}
+.pagination{display:flex;justify-content:center;gap:8px;padding:16px;align-items:center}
+.page-info{color:var(--text2);font-size:13px}
+.tab-content{display:none}.tab-content.active{display:block}
+.kpi-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(220px,1fr));gap:16px;margin-bottom:20px}
+.kpi-card{background:var(--card);border-radius:var(--radius);padding:20px;border:1px solid var(--border);box-shadow:var(--shadow);transition:var(--transition);position:relative;overflow:hidden}
+.kpi-card:hover{transform:translateY(-2px);box-shadow:0 8px 32px rgba(0,0,0,.4)}
+.kpi-card::before{content:'';position:absolute;top:0;left:0;width:4px;height:100%;border-radius:4px 0 0 4px}
+.kpi-card:nth-child(1)::before{background:var(--accent)}
+.kpi-card:nth-child(2)::before{background:var(--accent2)}
+.kpi-card:nth-child(3)::before{background:var(--accent3)}
+.kpi-card:nth-child(4)::before{background:var(--accent4)}
+.kpi-card:nth-child(5)::before{background:#c084fc}
+.kpi-card:nth-child(6)::before{background:var(--danger)}
+.kpi-label{font-size:12px;color:var(--text2);text-transform:uppercase;letter-spacing:.5px;margin-bottom:6px}
+.kpi-value{font-size:28px;font-weight:800;background:linear-gradient(135deg,var(--text),#cbd5e1);-webkit-background-clip:text;-webkit-text-fill-color:transparent}
+.kpi-sub{font-size:11px;color:var(--text2);margin-top:4px}
+.chart-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(480px,1fr));gap:16px;margin-bottom:20px}
+.chart-card{background:var(--card);border-radius:var(--radius);padding:20px;border:1px solid var(--border);box-shadow:var(--shadow)}
+.chart-card h3{font-size:14px;font-weight:700;margin-bottom:16px;color:var(--text)}
+.chart-card canvas{width:100%!important;max-height:320px}
+.modal-overlay{display:none;position:fixed;inset:0;background:rgba(0,0,0,.6);z-index:100;align-items:center;justify-content:center;backdrop-filter:blur(4px)}
+.modal-overlay.show{display:flex}
+.modal{background:var(--card);border-radius:var(--radius);padding:28px;max-width:800px;width:95%;max-height:85vh;overflow-y:auto;border:1px solid var(--border);box-shadow:0 20px 60px rgba(0,0,0,.5)}
+.modal h2{margin-bottom:20px;font-size:1.2rem}
+.modal .form-grid{display:grid;grid-template-columns:repeat(2,1fr);gap:12px}
+.modal .form-grid label{display:flex;flex-direction:column;gap:4px;font-size:12px;color:var(--text2)}
+.modal .form-grid input,.modal .form-grid textarea{padding:8px 12px;border:1px solid var(--border);border-radius:6px;background:var(--bg);color:var(--text);font-size:13px;outline:none}
+.modal .form-grid input:focus{border-color:var(--accent)}
+.modal .form-grid .full{grid-column:1/-1}
+.modal-actions{display:flex;gap:10px;margin-top:20px;justify-content:flex-end}
+.toast{position:fixed;bottom:24px;right:24px;background:var(--accent3);color:#0f172a;padding:12px 20px;border-radius:8px;font-weight:600;font-size:13px;z-index:200;animation:slideUp .3s ease;display:none}
+.toast.error{background:var(--danger);color:#fff}
+@keyframes slideUp{from{transform:translateY(20px);opacity:0}to{transform:translateY(0);opacity:1}}
+.util-badge{display:inline-block;padding:2px 8px;border-radius:12px;font-size:11px;font-weight:700}
+.util-high{background:rgba(52,211,153,.15);color:var(--accent3)}
+.util-mid{background:rgba(251,191,36,.15);color:var(--accent4)}
+.util-low{background:rgba(248,113,113,.15);color:var(--danger)}
+@media(max-width:768px){.header{flex-direction:column;text-align:center}.chart-grid{grid-template-columns:1fr}.kpi-grid{grid-template-columns:repeat(2,1fr)}.modal .form-grid{grid-template-columns:1fr}}
+.kanban-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(300px,1fr));gap:16px;margin-bottom:20px}
+.kanban-col{background:var(--card);border-radius:var(--radius);padding:16px;border:1px solid var(--border)}
+.kanban-col h3{font-size:13px;font-weight:700;margin-bottom:12px;padding-bottom:8px;border-bottom:2px solid var(--border)}
+.kanban-item{padding:10px 12px;background:var(--bg);border-radius:8px;margin-bottom:8px;font-size:12px;border-left:3px solid var(--accent);cursor:pointer;transition:var(--transition)}
+.kanban-item:hover{transform:translateX(4px)}
+.pwd-overlay{display:none;position:fixed;inset:0;background:rgba(0,0,0,.65);z-index:200;align-items:center;justify-content:center;backdrop-filter:blur(6px)}
+.pwd-overlay.show{display:flex}
+.pwd-dialog{background:var(--card);border-radius:var(--radius);padding:32px;width:400px;max-width:95%;border:1px solid var(--border);box-shadow:0 20px 60px rgba(0,0,0,.5);text-align:center}
+.pwd-dialog h2{font-size:1.1rem;margin-bottom:8px;color:var(--text)}
+.pwd-dialog .pwd-sub{font-size:12px;color:var(--text2);margin-bottom:20px}
+.pwd-dialog .pwd-input{width:100%;padding:12px 16px;border:2px solid var(--border);border-radius:8px;background:var(--bg);color:var(--text);font-size:15px;outline:none;text-align:center;letter-spacing:4px;transition:var(--transition)}
+.pwd-dialog .pwd-input:focus{border-color:var(--accent);box-shadow:0 0 0 4px rgba(56,189,248,.1)}
+.pwd-actions{display:flex;gap:10px;margin-top:20px;justify-content:center}
+.pwd-error{color:var(--danger);font-size:12px;margin-top:8px;display:none}
+.lock-btn{display:inline-flex;align-items:center;gap:6px;padding:8px 14px;border-radius:8px;font-size:13px;font-weight:600;cursor:pointer;transition:var(--transition);border:1px solid}
+.lock-btn.unlocked{background:rgba(52,211,153,.12);color:var(--accent3);border-color:rgba(52,211,153,.3)}
+.lock-btn.unlocked:hover{background:rgba(52,211,153,.2)}
+.lock-btn.locked{background:rgba(148,163,184,.08);color:var(--text2);border-color:var(--border)}
+.lock-btn.locked:hover{background:rgba(148,163,184,.15);color:var(--text)}
+
+.tab-badge{display:inline-block;background:rgba(255,255,255,.1);padding:2px 8px;border-radius:10px;font-size:11px;margin-left:6px}
+</style>
+</head>
+<body>
+<div class="app">
+<div class="header">
+<h1>📊 宝鸡基地冲压主料消耗定额明细表</h1>
+<div class="meta">
+<button class="lock-btn locked" id="lockBtn" onclick="toggleLock()" title="点击解锁以编辑数据">🔒 只读模式</button>
+<button class="btn btn-secondary" onclick="exportCSV()">📥 导出CSV</button>
+<button class="btn btn-primary" id="btnAdd" onclick="openAddModal()" disabled="" style="opacity:.5">＋ 新增记录</button>
+<button class="btn btn-success" id="btnSave" onclick="saveAll()" disabled="" style="opacity:.5">💾 保存数据</button>
+<button class="btn btn-secondary" onclick="changePassword()" style="font-size:12px">🔑 修改密码</button>
+<button class="btn btn-secondary" id="btnPublish" onclick="publishToGitHub()" disabled style="opacity:.5;font-size:12px">🚀 发布到网站</button>
+</div>
+</div>
+<div class="tabs">
+<button class="tab active" onclick="switchTab('table')">📋 数据表格 <span class="tab-badge" id="tableCount">59</span></button>
+<button class="tab" onclick="switchTab('dashboard')">📈 看板分析</button>
+<button class="tab" onclick="switchTab('kanban')">🎯 零件看板</button>
+</div>
+
+<div id="tab-table" class="tab-content active">
+<div class="toolbar">
+<input type="text" class="search-box" placeholder="🔍 搜索车型、零件名称、牌号、钢厂..." oninput="filterTable()" id="searchInput">
+<select onchange="filterTable()" id="filterModel"><option value="">全部车型</option><option value="FX11">FX11</option><option value="FX11-A2">FX11-A2</option><option value="FX11-A2-G">FX11-A2-G</option><option value="FX11-A2-G墨西哥">FX11-A2-G墨西哥</option><option value="FX11-A2-G墨西哥\">FX11-A2-G墨西哥\</option><option value="FX11-A2.N155-D2">FX11-A2.N155-D2</option><option value="FX11-A2借用G636">FX11-A2借用G636</option><option value="FX11-A3">FX11-A3</option><option value="FX11-G">FX11-G</option><option value="FX11-J1">FX11-J1</option><option value="FX11-J1/HEV">FX11-J1/HEV</option><option value="FX11委外件FX11-J1，FX11-A2-G">FX11委外件FX11-J1，FX11-A2-G</option><option value="FX12-A2">FX12-A2</option><option value="G636">G636</option><option value="N155-D">N155-D</option><option value="N155-D.N155-D2">N155-D.N155-D2</option><option value="N155-D2">N155-D2</option><option value="P166">P166</option><option value="委外件FX11-J1">委外件FX11-J1</option><option value="带智驾摄像头">带智驾摄像头</option></select>
+<select onchange="filterTable()" id="filterPSS"><option value="">全部PSS</option><option value="220">220</option><option value="230">230</option><option value="240">240</option><option value="270">270</option><option value="271">271</option></select>
+<select onchange="filterTable()" id="filterCategory"><option value="">全部类别</option><option value="main">main</option></select>
+<select onchange="changePageSize()" id="pageSize"><option value="20">20条/页</option><option value="50">50条/页</option><option value="100">100条/页</option><option value="9999">全部</option></select>
+</div>
+<div class="table-wrap" id="tableWrap"><table><thead><tr><th style="width:40px">#</th><th onclick="sortTable('车型')">车型</th><th onclick="sortTable('PSS')">PSS</th><th onclick="sortTable('零件名称')">零件名称</th><th onclick="sortTable('零件件号_变更后')">零件件号_变更后</th><th onclick="sortTable('钢板物料名称')">钢板物料名称</th><th onclick="sortTable('牌号')">牌号</th><th onclick="sortTable('钢厂')">钢厂</th><th onclick="sortTable('加工方式')">加工方式</th><th onclick="sortTable('料片形状')">料片形状</th><th onclick="sortTable('厚度_mm')">厚度_mm</th><th onclick="sortTable('宽度_mm')">宽度_mm</th><th onclick="sortTable('板料用量_PCS')">板料用量_PCS</th><th onclick="sortTable('理论板料重量')">理论板料重量</th><th onclick="sortTable('理论零件重量')">理论零件重量</th><th onclick="sortTable('称重板料重量')">称重板料重量</th><th onclick="sortTable('称重零件重量')">称重零件重量</th><th onclick="sortTable('材料利用率')">材料利用率</th><th onclick="sortTable('备注')">备注</th><th style="width:60px">操作</th></tr></thead><tbody><tr data-id="3" data-idx="0"><td style="color:var(--text2)">1</td><td>FX11,FX11-J1</td><td>240</td><td>J1发动机罩内板</td><td>8891865880</td><td>S000001397</td><td>DC04</td><td>湖北汇通</td><td>落料</td><td>弧形料</td><td>0.6</td><td>1750</td><td>1.00</td><td>10.501</td><td>7.173</td><td>10.501</td><td>6.941</td><td><span class="util-badge util-high">68.3%</span></td><td></td><td><button class="btn btn-sm btn-primary" onclick="openEditModal(0)">✏️</button></td></tr><tr data-id="4" data-idx="1"><td style="color:var(--text2)">2</td><td>FX11,FX11-J1</td><td>240</td><td>J1发动机罩外板</td><td>8891865878</td><td>S000001827</td><td>HC180BD+Z</td><td>湖北汇通</td><td>落料</td><td>弧形料</td><td>0.65</td><td>1860</td><td>1.00</td><td>13.239</td><td>9.22889</td><td>13.239</td><td>9.207651</td><td><span class="util-badge util-high">69.7%</span></td><td></td><td><button class="btn btn-sm btn-primary" onclick="openEditModal(1)">✏️</button></td></tr><tr data-id="5" data-idx="2"><td style="color:var(--text2)">3</td><td>FX11,FX11-J1</td><td>230</td><td>J1背门上外板</td><td>8891866984</td><td>S000001387</td><td>DC56D+Z</td><td>宝井</td><td>摆剪</td><td>梯形料</td><td>0.65</td><td>990</td><td>1.00</td><td>7.820</td><td>3.3848482855768003</td><td>7.820</td><td>3.3937429999999997</td><td><span class="util-badge util-low">43.3%</span></td><td></td><td><button class="btn btn-sm btn-primary" onclick="openEditModal(2)">✏️</button></td></tr><tr data-id="6" data-idx="3"><td style="color:var(--text2)">4</td><td>FX11,FX11-J1</td><td>230</td><td>J1背门下外板</td><td>8891867589</td><td>S000001812</td><td>DC07E+Z</td><td>宝井</td><td>横切</td><td>方料</td><td>0.7</td><td>1760</td><td>1.00</td><td>7.253</td><td>3.83774463896805</td><td>7.253</td><td>4.409585</td><td><span class="util-badge util-mid">52.9%</span></td><td></td><td><button class="btn btn-sm btn-primary" onclick="openEditModal(3)">✏️</button></td></tr><tr data-id="7" data-idx="4"><td style="color:var(--text2)">5</td><td>FX11,FX11-J1</td><td>230</td><td>J1背门内板</td><td>8891867658</td><td>S000001398</td><td>DC56D+ZM</td><td>湖北汇通</td><td>落料</td><td>落料</td><td>0.7</td><td>1750</td><td>1.00</td><td>12.355</td><td>6.367185260627529</td><td>12.355</td><td>6.377</td><td><span class="util-badge util-mid">51.5%</span></td><td></td><td><button class="btn btn-sm btn-primary" onclick="openEditModal(4)">✏️</button></td></tr><tr data-id="8" data-idx="5"><td style="color:var(--text2)">6</td><td>FX11,FX11-J1</td><td>240</td><td>J1左翼子板
+J1右翼子板</td><td>8891866394
+8891866406</td><td>S000001395</td><td>DC54D+Z</td><td>湖北汇通</td><td>摆剪</td><td>梯形料</td><td>0.65</td><td>1205</td><td>2.00</td><td>5.349</td><td>4.159260000000001</td><td>5.349</td><td>4.087903</td><td><span class="util-badge util-high">77.8%</span></td><td></td><td><button class="btn btn-sm btn-primary" onclick="openEditModal(5)">✏️</button></td></tr><tr data-id="9" data-idx="6"><td style="color:var(--text2)">7</td><td>FX11-J1/HEV</td><td>240</td><td>发动机罩内板</td><td>8891865880</td><td>S000003453</td><td>DC54D+Z</td><td>湖北汇通</td><td>落料</td><td>弧形料</td><td>0.6</td><td>1750</td><td>1.00</td><td>10.501</td><td>7.173</td><td>10.501</td><td>6.941</td><td><span class="util-badge util-high">68.3%</span></td><td>已切换</td><td><button class="btn btn-sm btn-primary" onclick="openEditModal(6)">✏️</button></td></tr><tr data-id="10" data-idx="7"><td style="color:var(--text2)">8</td><td>FX11,FX11-J1</td><td>271</td><td>全景玻璃
+顶盖外板</td><td>8892507196</td><td>S000001391</td><td>HC180B</td><td>宝井</td><td>横切</td><td>方料</td><td>0.7</td><td>1340</td><td>0.50</td><td>10.014</td><td>3.567</td><td>10.014</td><td>3.388</td><td><span class="util-badge util-low">35.6%</span></td><td>无生产计划，但未停产</td><td><button class="btn btn-sm btn-primary" onclick="openEditModal(7)">✏️</button></td></tr><tr data-id="11" data-idx="8"><td style="color:var(--text2)">9</td><td>G636</td><td>240</td><td>发动机罩内板</td><td>8893267573</td><td>S000001816</td><td>DC04</td><td>湖北汇通</td><td>落料</td><td>弧形料</td><td>0.6</td><td>1810</td><td>1.00</td><td>10.997</td><td>0</td><td>10.997</td><td>7.21033547032718</td><td><span class="util-badge util-high">65.6%</span></td><td></td><td><button class="btn btn-sm btn-primary" onclick="openEditModal(8)">✏️</button></td></tr><tr data-id="12" data-idx="9"><td style="color:var(--text2)">10</td><td>G636</td><td>240</td><td>发动机罩外板</td><td>8893265246</td><td>S000001815</td><td>HC180BD+Z</td><td>湖北汇通</td><td>落料</td><td>弧形料</td><td>0.65</td><td>1840</td><td>1.00</td><td>13.275</td><td>0</td><td>13.275</td><td>9.091097715560451</td><td><span class="util-badge util-high">68.5%</span></td><td></td><td><button class="btn btn-sm btn-primary" onclick="openEditModal(9)">✏️</button></td></tr><tr data-id="13" data-idx="10"><td style="color:var(--text2)">11</td><td>G636</td><td>230</td><td>背门上外板</td><td>8893265629</td><td>S000001817</td><td>DC56D+Z</td><td>宝井</td><td>摆剪</td><td>梯形料</td><td>0.65</td><td>895</td><td>1.00</td><td>6.919</td><td>0</td><td>6.919</td><td>3.1015605916671696</td><td><span class="util-badge util-low">44.8%</span></td><td></td><td><button class="btn btn-sm btn-primary" onclick="openEditModal(10)">✏️</button></td></tr><tr data-id="14" data-idx="11"><td style="color:var(--text2)">12</td><td>G636</td><td>230</td><td>背门下外板</td><td>8893265652</td><td>S000001818</td><td>DC07E+Z</td><td>宝井</td><td>横切</td><td>方料</td><td>0.7</td><td>1640</td><td>1.00</td><td>6.579</td><td>3.57390062557775</td><td>6.579</td><td>3.68260736136852</td><td><span class="util-badge util-mid">54.3%</span></td><td></td><td><button class="btn btn-sm btn-primary" onclick="openEditModal(11)">✏️</button></td></tr><tr data-id="15" data-idx="12"><td style="color:var(--text2)">13</td><td>G636</td><td>230</td><td>背门内板</td><td>8893263429</td><td>S000001819</td><td>DC56D+ZM</td><td>湖北汇通</td><td>落料</td><td>落料</td><td>0.65</td><td>1640</td><td>1.00</td><td>11.08</td><td>0</td><td>11.08</td><td>6.14989960054532</td><td><span class="util-badge util-mid">55.5%</span></td><td></td><td><button class="btn btn-sm btn-primary" onclick="openEditModal(12)">✏️</button></td></tr><tr data-id="16" data-idx="13"><td style="color:var(--text2)">14</td><td>G636
+FX12-A2</td><td>271</td><td>左侧围外板
+右侧围外板</td><td>8894316125
+8893255373</td><td>S000003034</td><td>DC06E+Z</td><td>宝井</td><td>落料</td><td>落料</td><td>0.65</td><td>1655</td><td>2.00</td><td>22.892</td><td>2.7671900000000003</td><td>23.035</td><td>20.04</td><td><span class="util-badge util-low">12.1%</span></td><td></td><td><button class="btn btn-sm btn-primary" onclick="openEditModal(13)">✏️</button></td></tr><tr data-id="17" data-idx="14"><td style="color:var(--text2)">15</td><td>G636</td><td>271</td><td>天窗顶盖外板</td><td>8893255378</td><td>S000002734</td><td>HC180B</td><td>宝井</td><td>横切</td><td>方料</td><td>0.7</td><td>1340</td><td>1.00</td><td>17.193</td><td>7.4508598286322805</td><td>17.15</td><td>7.451</td><td><span class="util-badge util-low">43.3%</span></td><td></td><td><button class="btn btn-sm btn-primary" onclick="openEditModal(14)">✏️</button></td></tr><tr data-id="18" data-idx="15"><td style="color:var(--text2)">16</td><td>G636</td><td>271</td><td>全景玻璃顶盖外板</td><td>8893255386</td><td>S000001821</td><td>HC180B</td><td>宝井</td><td>横切</td><td>方料</td><td>0.7</td><td>1335</td><td>0.50</td><td>9.610</td><td>3.539</td><td>9.610</td><td>3.53759176589548</td><td><span class="util-badge util-low">36.8%</span></td><td>无生产计划，但未停产</td><td><button class="btn btn-sm btn-primary" onclick="openEditModal(15)">✏️</button></td></tr><tr data-id="19" data-idx="16"><td style="color:var(--text2)">17</td><td>G636
+FX12-A2</td><td>270</td><td>后地板面板</td><td>6608722464</td><td>S000001822</td><td>DC04</td><td>马钢/攀钢</td><td>横切</td><td>方料</td><td>0.7</td><td>1380</td><td>0.50</td><td>14.105</td><td>4.98253774206455</td><td>14.03</td><td>4.635</td><td><span class="util-badge util-low">35.3%</span></td><td></td><td><button class="btn btn-sm btn-primary" onclick="openEditModal(16)">✏️</button></td></tr><tr data-id="20" data-idx="17"><td style="color:var(--text2)">18</td><td>G636
+FX12-A2</td><td>270</td><td>中地板</td><td>8893167278</td><td>S000002920</td><td>DC04</td><td>湖北汇通</td><td>横切</td><td>方料</td><td>0.7</td><td>1720</td><td>0.50</td><td>16.256</td><td>5.911449999999999</td><td>16.19</td><td>5.4825</td><td><span class="util-badge util-low">36.4%</span></td><td></td><td><button class="btn btn-sm btn-primary" onclick="openEditModal(17)">✏️</button></td></tr><tr data-id="21" data-idx="18"><td style="color:var(--text2)">19</td><td>FX11-A2-G墨西哥\
+FX11-A2-G</td><td>220</td><td>右前门内板
+左前门内板</td><td>6608410983
+6608410984</td><td>S000001400</td><td>DC56D+ZM</td><td>湖北汇通</td><td>横切</td><td>方料</td><td>0.7</td><td>1450</td><td>1</td><td>16.294</td><td>11.036</td><td>16.177500000000002</td><td>11.036</td><td><span class="util-badge util-high">67.7%</span></td><td></td><td><button class="btn btn-sm btn-primary" onclick="openEditModal(18)">✏️</button></td></tr><tr data-id="22" data-idx="19"><td style="color:var(--text2)">20</td><td>FX11-A2,FX11-J1,FX11-A2-G,N155-D,N155-D2,G636,FX12-A2,FX11-A3</td><td>220</td><td>左前门内板
+右前门内板</td><td>6608478423
+6608478422</td><td>S000001400</td><td>DC56D+ZM</td><td>湖北汇通</td><td>横切</td><td>方料</td><td>0.7</td><td>1450</td><td>1</td><td>16.294</td><td>11.036</td><td>16.177500000000002</td><td>9.690000000000001</td><td><span class="util-badge util-high">67.7%</span></td><td></td><td><button class="btn btn-sm btn-primary" onclick="openEditModal(19)">✏️</button></td></tr></tbody></table></div>
+<div class="pagination" id="pagination"><span class="page-info">共 59 条，第 1/3 页</span><button class="btn btn-sm btn-secondary" onclick="goPage(1)" disabled="">⏮</button><button class="btn btn-sm btn-secondary" onclick="goPage(0)" disabled="">◀</button><button class="btn btn-sm btn-primary" onclick="goPage(1)">1</button><button class="btn btn-sm btn-secondary" onclick="goPage(2)">2</button><button class="btn btn-sm btn-secondary" onclick="goPage(3)">3</button><button class="btn btn-sm btn-secondary" onclick="goPage(2)">▶</button><button class="btn btn-sm btn-secondary" onclick="goPage(3)">⏭</button></div>
+</div>
+
+<div id="tab-dashboard" class="tab-content">
+<div class="kpi-grid" id="kpiGrid"></div>
+<div class="chart-grid">
+<div class="chart-card"><h3>📊 各车型零件数量分布</h3><canvas id="chartModel"></canvas></div>
+<div class="chart-card"><h3>🔩 钢板牌号使用分布</h3><canvas id="chartGrade"></canvas></div>
+<div class="chart-card"><h3>🏭 钢厂/代理商分布</h3><canvas id="chartMill"></canvas></div>
+<div class="chart-card"><h3>📐 材料厚度分布</h3><canvas id="chartThickness"></canvas></div>
+<div class="chart-card"><h3>⚖️ 理论 vs 称重板料重量对比 (Top 15)</h3><canvas id="chartWeight"></canvas></div>
+<div class="chart-card"><h3>♻️ 材料利用率分布</h3><canvas id="chartUtilization"></canvas></div>
+</div>
+</div>
+
+<div id="tab-kanban" class="tab-content">
+<div class="kanban-grid" id="kanbanGrid"></div>
+</div>
+</div>
+
+<div class="pwd-overlay" id="pwdOverlay">
+<div class="pwd-dialog">
+<h2 id="pwdTitle">🔐 请输入编辑密码</h2>
+<div class="pwd-sub" id="pwdSub">首次使用请设置密码，后续编辑需验证</div>
+<input type="password" class="pwd-input" id="pwdInput" placeholder="请输入密码" maxlength="32" autocomplete="off">
+<div class="pwd-error" id="pwdError">密码错误，请重试</div>
+<div class="pwd-actions">
+<button class="btn btn-secondary" onclick="closePwdModal()">取消</button>
+<button class="btn btn-primary" id="pwdConfirmBtn" onclick="verifyPassword()">确认</button>
+</div>
+</div>
+</div>
+
+<div class="modal-overlay" id="editModal">
+<div class="modal">
+<h2 id="modalTitle">编辑记录</h2>
+<div class="form-grid" id="modalForm"></div>
+<div class="modal-actions">
+<button class="btn btn-secondary" onclick="closeModal()">取消</button>
+<button class="btn btn-danger btn-sm" id="btnDelete" style="display:none;margin-right:auto" onclick="deleteRecord()">🗑 删除</button>
+<button class="btn btn-primary" onclick="saveRecord()">💾 保存</button>
+</div>
+</div>
+</div>
+
+<div class="toast" id="toast"></div>
+
+<script>
+const COLUMNS = ["车型", "PSS", "零件名称", "零件件号_变更前", "零件件号_变更后", "钢板物料编码", "钢板物料名称", "钢厂", "代理商编码", "加工方式", "品类", "料片形状", "牌号", "表面质量", "表面处理", "厚度_mm", "宽度_mm", "上长度_mm", "下长度_mm", "板料用量_PCS", "理论板料重量", "理论零件重量", "称重板料重量", "称重零件重量", "大宗系统维护", "备注"];
+const DISPLAY_COLS = ['车型','PSS','零件名称','零件件号_变更后','钢板物料名称','牌号','钢厂','加工方式','料片形状','厚度_mm','宽度_mm','板料用量_PCS','理论板料重量','理论零件重量','称重板料重量','称重零件重量','材料利用率','备注'];
+const EDITABLE_COLS = ['车型','PSS','零件名称','零件件号_变更前','零件件号_变更后','钢板物料编码','钢板物料名称','钢厂','代理商编码','加工方式','品类','料片形状','牌号','表面质量','表面处理','厚度_mm','宽度_mm','上长度_mm','下长度_mm','板料用量_PCS','理论板料重量','理论零件重量','称重板料重量','称重零件重量','大宗系统维护','备注'];
+const NUMERIC_COLS = ['厚度_mm','宽度_mm','上长度_mm','下长度_mm','板料用量_PCS','理论板料重量','理论零件重量','称重板料重量','称重零件重量'];
+
+let allData = [{"车型":"FX11,FX11-J1","PSS":"240","零件名称":"J1发动机罩内板","零件件号_变更前":"","零件件号_变更后":"8891865880","钢板物料编码":"DC04 0.6*1750*1274","钢板物料名称":"S000001397","钢厂":"湖北汇通","代理商编码":"270028","加工方式":"落料","品类":"钢板","料片形状":"弧形料","牌号":"DC04","表面质量":"FB","表面处理":"涂油","厚度_mm":"0.6","宽度_mm":"1750","上长度_mm":"","下长度_mm":"1274","板料用量_PCS":"1.00","理论板料重量":"10.501","理论零件重量":"7.173","称重板料重量":"10.501","称重零件重量":"6.941","大宗系统维护":"","备注":"","_row":3,"_category":"main","厚度_mm_num":0.6,"宽度_mm_num":1750,"理论板料重量_num":10.501,"理论零件重量_num":7.173,"称重板料重量_num":10.501,"称重零件重量_num":6.941,"板料用量_PCS_num":1,"上长度_mm_num":null,"下长度_mm_num":1274,"材料利用率":68.3},{"车型":"FX11,FX11-J1","PSS":"240","零件名称":"J1发动机罩外板","零件件号_变更前":"","零件件号_变更后":"8891865878","钢板物料编码":"HC180BD+Z 50/50 0.65*1860*1395","钢板物料名称":"S000001827","钢厂":"湖北汇通","代理商编码":"270028","加工方式":"落料","品类":"钢板","料片形状":"弧形料","牌号":"HC180BD+Z","表面质量":"FD","表面处理":"涂油","厚度_mm":"0.65","宽度_mm":"1860","上长度_mm":"","下长度_mm":"1395","板料用量_PCS":"1.00","理论板料重量":"13.239","理论零件重量":"9.22889","称重板料重量":"13.239","称重零件重量":"9.207651","大宗系统维护":"","备注":"","_row":4,"_category":"main","厚度_mm_num":0.65,"宽度_mm_num":1860,"理论板料重量_num":13.239,"理论零件重量_num":9.22889,"称重板料重量_num":13.239,"称重零件重量_num":9.207651,"板料用量_PCS_num":1,"上长度_mm_num":null,"下长度_mm_num":1395,"材料利用率":69.7},{"车型":"FX11,FX11-J1","PSS":"230","零件名称":"J1背门上外板","零件件号_变更前":"","零件件号_变更后":"8891866984","钢板物料编码":"DC56D+Z 50/50 0.65*990*1600","钢板物料名称":"S000001387","钢厂":"宝井","代理商编码":"574314","加工方式":"摆剪","品类":"钢板","料片形状":"梯形料","牌号":"DC56D+Z","表面质量":"FD","表面处理":"涂油","厚度_mm":"0.65","宽度_mm":"990","上长度_mm":"1600","下长度_mm":"1496","板料用量_PCS":"1.00","理论板料重量":"7.820","理论零件重量":"3.3848482855768003","称重板料重量":"7.820","称重零件重量":"3.3937429999999997","大宗系统维护":"","备注":"","_row":5,"_category":"main","厚度_mm_num":0.65,"宽度_mm_num":990,"理论板料重量_num":7.82,"理论零件重量_num":3.3848482855768003,"称重板料重量_num":7.82,"称重零件重量_num":3.3937429999999997,"板料用量_PCS_num":1,"上长度_mm_num":1600,"下长度_mm_num":1496,"材料利用率":43.3},{"车型":"FX11,FX11-J1","PSS":"230","零件名称":"J1背门下外板","零件件号_变更前":"","零件件号_变更后":"8891867589","钢板物料编码":"DC07E 0.7*1760*750","钢板物料名称":"S000001812","钢厂":"宝井","代理商编码":"574314","加工方式":"横切","品类":"钢板","料片形状":"方料","牌号":"DC07E+Z","表面质量":"FD","表面处理":"涂油","厚度_mm":"0.7","宽度_mm":"1760","上长度_mm":"","下长度_mm":"750","板料用量_PCS":"1.00","理论板料重量":"7.253","理论零件重量":"3.83774463896805","称重板料重量":"7.253","称重零件重量":"4.409585","大宗系统维护":"","备注":"","_row":6,"_category":"main","厚度_mm_num":0.7,"宽度_mm_num":1760,"理论板料重量_num":7.253,"理论零件重量_num":3.83774463896805,"称重板料重量_num":7.253,"称重零件重量_num":4.409585,"板料用量_PCS_num":1,"上长度_mm_num":null,"下长度_mm_num":750,"材料利用率":52.9},{"车型":"FX11,FX11-J1","PSS":"230","零件名称":"J1背门内板","零件件号_变更前":"","零件件号_变更后":"8891867658","钢板物料编码":"DC56D+ZM 35/35 0.7*1750*1375","钢板物料名称":"S000001398","钢厂":"湖北汇通","代理商编码":"270028","加工方式":"落料","品类":"钢板","料片形状":"落料","牌号":"DC56D+ZM","表面质量":"FB","表面处理":"涂油","厚度_mm":"0.7","宽度_mm":"1750","上长度_mm":"","下长度_mm":"1375","板料用量_PCS":"1.00","理论板料重量":"12.355","理论零件重量":"6.367185260627529","称重板料重量":"12.355","称重零件重量":"6.377","大宗系统维护":"","备注":"","_row":7,"_category":"main","厚度_mm_num":0.7,"宽度_mm_num":1750,"理论板料重量_num":12.355,"理论零件重量_num":6.367185260627529,"称重板料重量_num":12.355,"称重零件重量_num":6.377,"板料用量_PCS_num":1,"上长度_mm_num":null,"下长度_mm_num":1375,"材料利用率":51.5},{"车型":"FX11,FX11-J1","PSS":"240","零件名称":"J1左翼子板\nJ1右翼子板","零件件号_变更前":"","零件件号_变更后":"8891866394\n8891866406","钢板物料编码":"DC54D+Z 50/50 0.65*1205*1395","钢板物料名称":"S000001395","钢厂":"湖北汇通","代理商编码":"270028","加工方式":"摆剪","品类":"钢板","料片形状":"梯形料","牌号":"DC54D+Z","表面质量":"FD","表面处理":"涂油","厚度_mm":"0.65","宽度_mm":"1205","上长度_mm":"1395","下长度_mm":"345","板料用量_PCS":"2.00","理论板料重量":"5.349","理论零件重量":"4.159260000000001","称重板料重量":"5.349","称重零件重量":"4.087903","大宗系统维护":"","备注":"","_row":8,"_category":"main","厚度_mm_num":0.65,"宽度_mm_num":1205,"理论板料重量_num":5.349,"理论零件重量_num":4.159260000000001,"称重板料重量_num":5.349,"称重零件重量_num":4.087903,"板料用量_PCS_num":2,"上长度_mm_num":1395,"下长度_mm_num":345,"材料利用率":77.8},{"车型":"FX11-J1/HEV","PSS":"240","零件名称":"发动机罩内板","零件件号_变更前":"","零件件号_变更后":"8891865880","钢板物料编码":"DC54D+Z 50/50 0.6*1750*1274","钢板物料名称":"S000003453","钢厂":"湖北汇通","代理商编码":"270028","加工方式":"落料","品类":"钢板","料片形状":"弧形料","牌号":"DC54D+Z","表面质量":"FB","表面处理":"涂油","厚度_mm":"0.6","宽度_mm":"1750","上长度_mm":"","下长度_mm":"1274","板料用量_PCS":"1.00","理论板料重量":"10.501","理论零件重量":"7.173","称重板料重量":"10.501","称重零件重量":"6.941","大宗系统维护":"","备注":"已切换","_row":9,"_category":"main","厚度_mm_num":0.6,"宽度_mm_num":1750,"理论板料重量_num":10.501,"理论零件重量_num":7.173,"称重板料重量_num":10.501,"称重零件重量_num":6.941,"板料用量_PCS_num":1,"上长度_mm_num":null,"下长度_mm_num":1274,"材料利用率":68.3},{"车型":"FX11,FX11-J1","PSS":"271","零件名称":"全景玻璃\n顶盖外板","零件件号_变更前":"","零件件号_变更后":"8892507196","钢板物料编码":"HC180B 0.7*1340*1360","钢板物料名称":"S000001391","钢厂":"宝井","代理商编码":"574314","加工方式":"横切","品类":"钢板","料片形状":"方料","牌号":"HC180B","表面质量":"FD","表面处理":"涂油","厚度_mm":"0.7","宽度_mm":"1340","上长度_mm":"","下长度_mm":"1360","板料用量_PCS":"0.50","理论板料重量":"10.014","理论零件重量":"3.567","称重板料重量":"10.014","称重零件重量":"3.388","大宗系统维护":"","备注":"无生产计划，但未停产","_row":10,"_category":"main","厚度_mm_num":0.7,"宽度_mm_num":1340,"理论板料重量_num":10.014,"理论零件重量_num":3.567,"称重板料重量_num":10.014,"称重零件重量_num":3.388,"板料用量_PCS_num":0.5,"上长度_mm_num":null,"下长度_mm_num":1360,"材料利用率":35.6},{"车型":"G636","PSS":"240","零件名称":"发动机罩内板","零件件号_变更前":"","零件件号_变更后":"8893267573","钢板物料编码":"DC04 0.6*1810*1290","钢板物料名称":"S000001816","钢厂":"湖北汇通","代理商编码":"270028","加工方式":"落料","品类":"钢板","料片形状":"弧形料","牌号":"DC04","表面质量":"FB","表面处理":"涂油","厚度_mm":"0.6","宽度_mm":"1810","上长度_mm":"","下长度_mm":"1290","板料用量_PCS":"1.00","理论板料重量":"10.997","理论零件重量":"0","称重板料重量":"10.997","称重零件重量":"7.21033547032718","大宗系统维护":"","备注":"","_row":11,"_category":"main","厚度_mm_num":0.6,"宽度_mm_num":1810,"理论板料重量_num":10.997,"理论零件重量_num":0,"称重板料重量_num":10.997,"称重零件重量_num":7.21033547032718,"板料用量_PCS_num":1,"上长度_mm_num":null,"下长度_mm_num":1290,"材料利用率":65.6},{"车型":"G636","PSS":"240","零件名称":"发动机罩外板","零件件号_变更前":"","零件件号_变更后":"8893265246","钢板物料编码":"HC180BD+Z 50/50 0.65*1840*1414","钢板物料名称":"S000001815","钢厂":"湖北汇通","代理商编码":"270028","加工方式":"落料","品类":"钢板","料片形状":"弧形料","牌号":"HC180BD+Z","表面质量":"FD","表面处理":"涂油","厚度_mm":"0.65","宽度_mm":"1840","上长度_mm":"","下长度_mm":"1414","板料用量_PCS":"1.00","理论板料重量":"13.275","理论零件重量":"0","称重板料重量":"13.275","称重零件重量":"9.091097715560451","大宗系统维护":"","备注":"","_row":12,"_category":"main","厚度_mm_num":0.65,"宽度_mm_num":1840,"理论板料重量_num":13.275,"理论零件重量_num":0,"称重板料重量_num":13.275,"称重零件重量_num":9.091097715560451,"板料用量_PCS_num":1,"上长度_mm_num":null,"下长度_mm_num":1414,"材料利用率":68.5},{"车型":"G636","PSS":"230","零件名称":"背门上外板","零件件号_变更前":"","零件件号_变更后":"8893265629","钢板物料编码":"DC56D+Z 50/50 0.65*895*1375+1655","钢板物料名称":"S000001817","钢厂":"宝井","代理商编码":"574314","加工方式":"摆剪","品类":"钢板","料片形状":"梯形料","牌号":"DC56D+Z","表面质量":"FD","表面处理":"涂油","厚度_mm":"0.65","宽度_mm":"895","上长度_mm":"1655","下长度_mm":"1375","板料用量_PCS":"1.00","理论板料重量":"6.919","理论零件重量":"0","称重板料重量":"6.919","称重零件重量":"3.1015605916671696","大宗系统维护":"","备注":"","_row":13,"_category":"main","厚度_mm_num":0.65,"宽度_mm_num":895,"理论板料重量_num":6.919,"理论零件重量_num":0,"称重板料重量_num":6.919,"称重零件重量_num":3.1015605916671696,"板料用量_PCS_num":1,"上长度_mm_num":1655,"下长度_mm_num":1375,"材料利用率":44.8},{"车型":"G636","PSS":"230","零件名称":"背门下外板","零件件号_变更前":"","零件件号_变更后":"8893265652","钢板物料编码":"DC07E+Z 45/45 0.7*1640*730","钢板物料名称":"S000001818","钢厂":"宝井","代理商编码":"574314","加工方式":"横切","品类":"钢板","料片形状":"方料","牌号":"DC07E+Z","表面质量":"FD","表面处理":"涂油","厚度_mm":"0.7","宽度_mm":"1640","上长度_mm":"","下长度_mm":"730","板料用量_PCS":"1.00","理论板料重量":"6.579","理论零件重量":"3.57390062557775","称重板料重量":"6.579","称重零件重量":"3.68260736136852","大宗系统维护":"","备注":"","_row":14,"_category":"main","厚度_mm_num":0.7,"宽度_mm_num":1640,"理论板料重量_num":6.579,"理论零件重量_num":3.57390062557775,"称重板料重量_num":6.579,"称重零件重量_num":3.68260736136852,"板料用量_PCS_num":1,"上长度_mm_num":null,"下长度_mm_num":730,"材料利用率":54.3},{"车型":"G636","PSS":"230","零件名称":"背门内板","零件件号_变更前":"","零件件号_变更后":"8893263429","钢板物料编码":"DC56D+ZM 35/35 0.65*1640*1360","钢板物料名称":"S000001819","钢厂":"湖北汇通","代理商编码":"270028","加工方式":"落料","品类":"钢板","料片形状":"落料","牌号":"DC56D+ZM","表面质量":"FB","表面处理":"涂油","厚度_mm":"0.65","宽度_mm":"1640","上长度_mm":"","下长度_mm":"1380","板料用量_PCS":"1.00","理论板料重量":"11.08","理论零件重量":"0","称重板料重量":"11.08","称重零件重量":"6.14989960054532","大宗系统维护":"","备注":"","_row":15,"_category":"main","厚度_mm_num":0.65,"宽度_mm_num":1640,"理论板料重量_num":11.08,"理论零件重量_num":0,"称重板料重量_num":11.08,"称重零件重量_num":6.14989960054532,"板料用量_PCS_num":1,"上长度_mm_num":null,"下长度_mm_num":1380,"材料利用率":55.5},{"车型":"G636\nFX12-A2","PSS":"271","零件名称":"左侧围外板\n右侧围外板","零件件号_变更前":"","零件件号_变更后":"8894316125\n8893255373","钢板物料编码":"DC06E+Z 45/45 0.65*1655*3415","钢板物料名称":"S000003034","钢厂":"宝井","代理商编码":"574314","加工方式":"落料","品类":"钢板","料片形状":"落料","牌号":"DC06E+Z","表面质量":"FD","表面处理":"涂油","厚度_mm":"0.65","宽度_mm":"1655","上长度_mm":"","下长度_mm":"3415","板料用量_PCS":"2.00","理论板料重量":"22.892","理论零件重量":"2.7671900000000003","称重板料重量":"23.035","称重零件重量":"20.04","大宗系统维护":"","备注":"","_row":16,"_category":"main","厚度_mm_num":0.65,"宽度_mm_num":1655,"理论板料重量_num":22.892,"理论零件重量_num":2.7671900000000003,"称重板料重量_num":23.035,"称重零件重量_num":20.04,"板料用量_PCS_num":2,"上长度_mm_num":null,"下长度_mm_num":3415,"材料利用率":12.1},{"车型":"G636","PSS":"271","零件名称":"天窗顶盖外板","零件件号_变更前":"","零件件号_变更后":"8893255378","钢板物料编码":"HC180B 0.7*1340*2335","钢板物料名称":"S000002734","钢厂":"宝井","代理商编码":"574314","加工方式":"横切","品类":"钢板","料片形状":"方料","牌号":"HC180B","表面质量":"FD","表面处理":"涂油","厚度_mm":"0.7","宽度_mm":"1340","上长度_mm":"","下长度_mm":"2335","板料用量_PCS":"1.00","理论板料重量":"17.193","理论零件重量":"7.4508598286322805","称重板料重量":"17.15","称重零件重量":"7.451","大宗系统维护":"","备注":"","_row":17,"_category":"main","厚度_mm_num":0.7,"宽度_mm_num":1340,"理论板料重量_num":17.193,"理论零件重量_num":7.4508598286322805,"称重板料重量_num":17.15,"称重零件重量_num":7.451,"板料用量_PCS_num":1,"上长度_mm_num":null,"下长度_mm_num":2335,"材料利用率":43.3},{"车型":"G636","PSS":"271","零件名称":"全景玻璃顶盖外板","零件件号_变更前":"","零件件号_变更后":"8893255386","钢板物料编码":"HC180B 0.7*1335*1310","钢板物料名称":"S000001821","钢厂":"宝井","代理商编码":"574314","加工方式":"横切","品类":"钢板","料片形状":"方料","牌号":"HC180B","表面质量":"FD","表面处理":"涂油","厚度_mm":"0.7","宽度_mm":"1335","上长度_mm":"","下长度_mm":"1310","板料用量_PCS":"0.50","理论板料重量":"9.610","理论零件重量":"3.539","称重板料重量":"9.610","称重零件重量":"3.53759176589548","大宗系统维护":"","备注":"无生产计划，但未停产","_row":18,"_category":"main","厚度_mm_num":0.7,"宽度_mm_num":1335,"理论板料重量_num":9.61,"理论零件重量_num":3.539,"称重板料重量_num":9.61,"称重零件重量_num":3.53759176589548,"板料用量_PCS_num":0.5,"上长度_mm_num":null,"下长度_mm_num":1310,"材料利用率":36.8},{"车型":"G636\nFX12-A2","PSS":"270","零件名称":"后地板面板","零件件号_变更前":"8894420428","零件件号_变更后":"6608722464","钢板物料编码":"DC04 0.7*1380*1860","钢板物料名称":"S000001822","钢厂":"马钢/攀钢","代理商编码":"512108","加工方式":"横切","品类":"钢板","料片形状":"方料","牌号":"DC04","表面质量":"FB","表面处理":"涂油","厚度_mm":"0.7","宽度_mm":"1380","上长度_mm":"","下长度_mm":"1860","板料用量_PCS":"0.50","理论板料重量":"14.105","理论零件重量":"4.98253774206455","称重板料重量":"14.03","称重零件重量":"4.635","大宗系统维护":"","备注":"","_row":19,"_category":"main","厚度_mm_num":0.7,"宽度_mm_num":1380,"理论板料重量_num":14.105,"理论零件重量_num":4.98253774206455,"称重板料重量_num":14.03,"称重零件重量_num":4.635,"板料用量_PCS_num":0.5,"上长度_mm_num":null,"下长度_mm_num":1860,"材料利用率":35.3},{"车型":"G636\nFX12-A2","PSS":"270","零件名称":"中地板","零件件号_变更前":"","零件件号_变更后":"8893167278","钢板物料编码":"DC04 0.7*1720*1720","钢板物料名称":"S000002920","钢厂":"湖北汇通","代理商编码":"270028","加工方式":"横切","品类":"钢板","料片形状":"方料","牌号":"DC04","表面质量":"FB","表面处理":"涂油","厚度_mm":"0.7","宽度_mm":"1720","上长度_mm":"","下长度_mm":"1720","板料用量_PCS":"0.50","理论板料重量":"16.256","理论零件重量":"5.911449999999999","称重板料重量":"16.19","称重零件重量":"5.4825","大宗系统维护":"","备注":"","_row":20,"_category":"main","厚度_mm_num":0.7,"宽度_mm_num":1720,"理论板料重量_num":16.256,"理论零件重量_num":5.911449999999999,"称重板料重量_num":16.19,"称重零件重量_num":5.4825,"板料用量_PCS_num":0.5,"上长度_mm_num":null,"下长度_mm_num":1720,"材料利用率":36.4},{"车型":"FX11-A2-G墨西哥\\\nFX11-A2-G","PSS":"220","零件名称":"右前门内板\n左前门内板","零件件号_变更前":"","零件件号_变更后":"6608410983\n6608410984","钢板物料编码":"PCR2505290238\n四门各取消一个孔贴","钢板物料名称":"S000001400","钢厂":"湖北汇通","代理商编码":"270028","加工方式":"横切","品类":"钢板","料片形状":"方料","牌号":"DC56D+ZM","表面质量":"FB","表面处理":"涂油","厚度_mm":"0.7","宽度_mm":"1450","上长度_mm":"","下长度_mm":"2045","板料用量_PCS":"1","理论板料重量":"16.294","理论零件重量":"11.036","称重板料重量":"16.177500000000002","称重零件重量":"11.036","大宗系统维护":"","备注":"","_row":21,"_category":"main","厚度_mm_num":0.7,"宽度_mm_num":1450,"理论板料重量_num":16.294,"理论零件重量_num":11.036,"称重板料重量_num":16.177500000000002,"称重零件重量_num":11.036,"板料用量_PCS_num":1,"上长度_mm_num":null,"下长度_mm_num":2045,"材料利用率":67.7},{"车型":"FX11-A2,FX11-J1,FX11-A2-G,N155-D,N155-D2,G636,FX12-A2,FX11-A3","PSS":"220","零件名称":"左前门内板\n右前门内板","零件件号_变更前":"","零件件号_变更后":"6608478423\n6608478422","钢板物料编码":"DC56D+ZM 35/35 0.7*1450*2045","钢板物料名称":"S000001400","钢厂":"湖北汇通","代理商编码":"270028","加工方式":"横切","品类":"钢板","料片形状":"方料","牌号":"DC56D+ZM","表面质量":"FB","表面处理":"涂油","厚度_mm":"0.7","宽度_mm":"1450","上长度_mm":"","下长度_mm":"2045","板料用量_PCS":"1","理论板料重量":"16.294","理论零件重量":"11.036","称重板料重量":"16.177500000000002","称重零件重量":"9.690000000000001","大宗系统维护":"","备注":"","_row":22,"_category":"main","厚度_mm_num":0.7,"宽度_mm_num":1450,"理论板料重量_num":16.294,"理论零件重量_num":11.036,"称重板料重量_num":16.177500000000002,"称重零件重量_num":9.690000000000001,"板料用量_PCS_num":1,"上长度_mm_num":null,"下长度_mm_num":2045,"材料利用率":67.7},{"车型":"FX11-A2-G墨西哥","PSS":"220","零件名称":"左前门内板\n右前门内板","零件件号_变更前":"6608478423\n6608478422","零件件号_变更后":"6608342723\n6608342722","钢板物料编码":"DC56D+ZM 35/35 0.7*1450*2045","钢板物料名称":"S000001400","钢厂":"湖北汇通","代理商编码":"270028","加工方式":"横切","品类":"钢板","料片形状":"方料","牌号":"DC56D+ZM","表面质量":"FB","表面处理":"涂油","厚度_mm":"0.7","宽度_mm":"1450","上长度_mm":"","下长度_mm":"2045","板料用量_PCS":"1","理论板料重量":"16.294","理论零件重量":"11.036","称重板料重量":"16.177500000000002","称重零件重量":"11.036","大宗系统维护":"历史版本","备注":"PCR2506290015孔位变更，新增状态","_row":23,"_category":"main","厚度_mm_num":0.7,"宽度_mm_num":1450,"理论板料重量_num":16.294,"理论零件重量_num":11.036,"称重板料重量_num":16.177500000000002,"称重零件重量_num":11.036,"板料用量_PCS_num":1,"上长度_mm_num":null,"下长度_mm_num":2045,"材料利用率":67.7},{"车型":"FX11-A2,FX11-J1,FX11-A2-G,N155-D,N155-D2,G636,FX12-A2,FX11-A3","PSS":"220","零件名称":"左前门外板\n右前门外板","零件件号_变更前":"","零件件号_变更后":"8891862827\n8891862828","钢板物料编码":"HC180BD+Z 50/50 0.65*1057*(2380+2626)","钢板物料名称":"S000001399","钢厂":"湖北汇通","代理商编码":"270028","加工方式":"摆剪","品类":"钢板","料片形状":"梯形料","牌号":"HC180BD+Z","表面质量":"FD","表面处理":"涂油","厚度_mm":"0.65","宽度_mm":"1057","上长度_mm":"2626","下长度_mm":"2380","板料用量_PCS":"1.00","理论板料重量":"13.500","理论零件重量":"10.134","称重板料重量":"12.15","称重零件重量":"9.014999999999999","大宗系统维护":"","备注":"","_row":24,"_category":"main","厚度_mm_num":0.65,"宽度_mm_num":1057,"理论板料重量_num":13.5,"理论零件重量_num":10.134,"称重板料重量_num":12.15,"称重零件重量_num":9.014999999999999,"板料用量_PCS_num":1,"上长度_mm_num":2626,"下长度_mm_num":2380,"材料利用率":75.1},{"车型":"FX11-A2,FX11-J1,FX11-A2-G,N155-D,N155-D2,G636,FX12-A2,FX11-A3","PSS":"220","零件名称":"左后门内板\n右后门内板","零件件号_变更前":"","零件件号_变更后":"6608342725\n6608342726","钢板物料编码":"DC56D+ZM 35/35 0.7*1390*2110","钢板物料名称":"S000001402","钢厂":"湖北汇通","代理商编码":"270028","加工方式":"落料","品类":"钢板","料片形状":"异形料","牌号":"DC56D+ZM","表面质量":"FB","表面处理":"涂油","厚度_mm":"0.7","宽度_mm":"1390","上长度_mm":"","下长度_mm":"2110","板料用量_PCS":"1","理论板料重量":"14.566","理论零件重量":"10.612","称重板料重量":"14.055","称重零件重量":"9.2875","大宗系统维护":"","备注":"","_row":25,"_category":"main","厚度_mm_num":0.7,"宽度_mm_num":1390,"理论板料重量_num":14.566,"理论零件重量_num":10.612,"称重板料重量_num":14.055,"称重零件重量_num":9.2875,"板料用量_PCS_num":1,"上长度_mm_num":null,"下长度_mm_num":2110,"材料利用率":72.9},{"车型":"FX11-A2,FX11-J1,FX11-A2-G,N155-D,N155-D2,G636,FX12-A2,FX11-A3","PSS":"220","零件名称":"左后车门外板\n右后车门外板","零件件号_变更前":"","零件件号_变更后":"8891862829\n8891862830","钢板物料编码":"HC180BD+Z 50/50 0.65*1149*2726","钢板物料名称":"S000001826","钢厂":"湖北汇通","代理商编码":"270028","加工方式":"摆剪","品类":"钢板","料片形状":"梯形料","牌号":"HC180BD+Z","表面质量":"FD","表面处理":"涂油","厚度_mm":"0.65","宽度_mm":"1149","上长度_mm":"2726","下长度_mm":"2186","板料用量_PCS":"1.00","理论板料重量":"14.399","理论零件重量":"9.216","称重板料重量":"14.245","称重零件重量":"9.015","大宗系统维护":"","备注":"","_row":26,"_category":"main","厚度_mm_num":0.65,"宽度_mm_num":1149,"理论板料重量_num":14.399,"理论零件重量_num":9.216,"称重板料重量_num":14.245,"称重零件重量_num":9.015,"板料用量_PCS_num":1,"上长度_mm_num":2726,"下长度_mm_num":2186,"材料利用率":64},{"车型":"FX11-A2,FX11-A2-G,N155-D,N155-D2,FX11-A3","PSS":"240","零件名称":"发动机罩外板","零件件号_变更前":"","零件件号_变更后":"6608200611","钢板物料编码":"HC180BD+ZM 35/35 0.65*1875*1430","钢板物料名称":"S000003629","钢厂":"湖北汇通","代理商编码":"270028","加工方式":"落料","品类":"钢板","料片形状":"弧形料","牌号":"HC180BD+ZM","表面质量":"FD","表面处理":"涂油","厚度_mm":"0.65","宽度_mm":"1875","上长度_mm":"","下长度_mm":"1430","板料用量_PCS":"1.00","理论板料重量":"13.681","理论零件重量":"9.44261","称重板料重量":"13.18","称重零件重量":"8.6325","大宗系统维护":"","备注":"","_row":27,"_category":"main","厚度_mm_num":0.65,"宽度_mm_num":1875,"理论板料重量_num":13.681,"理论零件重量_num":9.44261,"称重板料重量_num":13.18,"称重零件重量_num":8.6325,"板料用量_PCS_num":1,"上长度_mm_num":null,"下长度_mm_num":1430,"材料利用率":69},{"车型":"FX11-A2,FX11-A2-G,N155-D,N155-D2,FX11-A3","PSS":"240","零件名称":"发动机罩内板","零件件号_变更前":"","零件件号_变更后":"6608200612","钢板物料编码":"DC54D+ZM 35/35 0.6*1830*1380","钢板物料名称":"S000003630","钢厂":"湖北汇通","代理商编码":"270028","加工方式":"落料","品类":"钢板","料片形状":"弧形料","牌号":"DC54D+ZM","表面质量":"FB","表面处理":"涂油","厚度_mm":"0.6","宽度_mm":"1830","上长度_mm":"","下长度_mm":"1380","板料用量_PCS":"1.00","理论板料重量":"11.895","理论零件重量":"7.622","称重板料重量":"11.34","称重零件重量":"6.702500000000001","大宗系统维护":"","备注":"","_row":28,"_category":"main","厚度_mm_num":0.6,"宽度_mm_num":1830,"理论板料重量_num":11.895,"理论零件重量_num":7.622,"称重板料重量_num":11.34,"称重零件重量_num":6.702500000000001,"板料用量_PCS_num":1,"上长度_mm_num":null,"下长度_mm_num":1380,"材料利用率":64.1},{"车型":"FX11-A2,FX11-A2-G,N155-D,N155-D2,FX11-A3","PSS":"230","零件名称":"背门外板上段","零件件号_变更前":"6608200605","零件件号_变更后":"6608554411","钢板物料编码":"DC56D+ZM 35/35 0.65*1525*1090","钢板物料名称":"S000003310","钢厂":"宝井","代理商编码":"574314","加工方式":"横切","品类":"钢板","料片形状":"方料","牌号":"DC56D+ZM","表面质量":"FD","表面处理":"涂油","厚度_mm":"0.65","宽度_mm":"1525","上长度_mm":"","下长度_mm":"1090","板料用量_PCS":"1.00","理论板料重量":"8.482","理论零件重量":"3.778","称重板料重量":"8.54","称重零件重量":"3.5475","大宗系统维护":"","备注":"PCR2510140089增加线束过孔","_row":29,"_category":"main","厚度_mm_num":0.65,"宽度_mm_num":1525,"理论板料重量_num":8.482,"理论零件重量_num":3.778,"称重板料重量_num":8.54,"称重零件重量_num":3.5475,"板料用量_PCS_num":1,"上长度_mm_num":null,"下长度_mm_num":1090,"材料利用率":44.5},{"车型":"FX11-A2,FX11-A2-G,N155-D,N155-D2,FX11-A3","PSS":"230","零件名称":"背门外板下段","零件件号_变更前":"","零件件号_变更后":"6608200606","钢板物料编码":"DC54D+ZM 35/35 0.65*1770*645","钢板物料名称":"S000003309","钢厂":"宝井","代理商编码":"574314","加工方式":"横切","品类":"钢板","料片形状":"方料","牌号":"DC54D+ZM","表面质量":"FD","表面处理":"涂油","厚度_mm":"0.65","宽度_mm":"1770","上长度_mm":"","下长度_mm":"645","板料用量_PCS":"1.00","理论板料重量":"5.825","理论零件重量":"3.246","称重板料重量":"5.775","称重零件重量":"3.08","大宗系统维护":"","备注":"","_row":30,"_category":"main","厚度_mm_num":0.65,"宽度_mm_num":1770,"理论板料重量_num":5.825,"理论零件重量_num":3.246,"称重板料重量_num":5.775,"称重零件重量_num":3.08,"板料用量_PCS_num":1,"上长度_mm_num":null,"下长度_mm_num":645,"材料利用率":55.7},{"车型":"FX11-A2,FX11-A2-G,N155-D,N155-D2,FX11-A3","PSS":"230","零件名称":"背门内板","零件件号_变更前":"","零件件号_变更后":"6608200600","钢板物料编码":"DC56D+ZM 35/35 0.7*1710*1480","钢板物料名称":"S000003308","钢厂":"湖北汇通","代理商编码":"270028","加工方式":"落料","品类":"钢板","料片形状":"落料","牌号":"DC56D+ZM","表面质量":"FB","表面处理":"涂油","厚度_mm":"0.7","宽度_mm":"1710","上长度_mm":"","下长度_mm":"1480","板料用量_PCS":"1.00","理论板料重量":"12.87","理论零件重量":"6.51","称重板料重量":"12.54","称重零件重量":"5.7275","大宗系统维护":"","备注":"","_row":31,"_category":"main","厚度_mm_num":0.7,"宽度_mm_num":1710,"理论板料重量_num":12.87,"理论零件重量_num":6.51,"称重板料重量_num":12.54,"称重零件重量_num":5.7275,"板料用量_PCS_num":1,"上长度_mm_num":null,"下长度_mm_num":1480,"材料利用率":50.6},{"车型":"FX11,FX11-J1,FX11-A2-G,FX11-A2,N155-D,N155-D2,FX11-A3","PSS":"271","零件名称":"左侧围外板\n右侧围外板","零件件号_变更前":"","零件件号_变更后":"8891883373\n8891883544","钢板物料编码":"DC06E+Z 45/45 0.65*1670*3350","钢板物料名称":"S000003188","钢厂":"宝井","代理商编码":"574314","加工方式":"落料","品类":"钢板","料片形状":"落料","牌号":"DC06E+Z","表面质量":"FD","表面处理":"涂油","厚度_mm":"0.65","宽度_mm":"1670","上长度_mm":"","下长度_mm":"3350","板料用量_PCS":"2.00","理论板料重量":"23.097","理论零件重量":"21.299","称重板料重量":"22.81","称重零件重量":"20.8825","大宗系统维护":"","备注":"","_row":32,"_category":"main","厚度_mm_num":0.65,"宽度_mm_num":1670,"理论板料重量_num":23.097,"理论零件重量_num":21.299,"称重板料重量_num":22.81,"称重零件重量_num":20.8825,"板料用量_PCS_num":2,"上长度_mm_num":null,"下长度_mm_num":3350,"材料利用率":92.2},{"车型":"FX11-A2借用G636,FX11-A2-G,FX12-A2,N155-D,N155-D2,FX11-A3","PSS":"240","零件名称":"左前翼子板\n右前翼子板","零件件号_变更前":"","零件件号_变更后":"8893267629\n8893267634","钢板物料编码":"DC54D+Z 50/50 0.65*1105*435+1350","钢板物料名称":"S000001824","钢厂":"湖北汇通","代理商编码":"270028","加工方式":"摆剪","品类":"钢板","料片形状":"梯形料","牌号":"DC54D+Z","表面质量":"FD","表面处理":"涂油","厚度_mm":"0.65","宽度_mm":"1105","上长度_mm":"1350","下长度_mm":"435","板料用量_PCS":"2.00","理论板料重量":"5.032","理论零件重量":"3.866","称重板料重量":"4.915","称重零件重量":"3.6950000000000003","大宗系统维护":"","备注":"","_row":33,"_category":"main","厚度_mm_num":0.65,"宽度_mm_num":1105,"理论板料重量_num":5.032,"理论零件重量_num":3.866,"称重板料重量_num":4.915,"称重零件重量_num":3.6950000000000003,"板料用量_PCS_num":2,"上长度_mm_num":1350,"下长度_mm_num":435,"材料利用率":76.8},{"车型":"FX12-A2,FX11-A3\n带智驾摄像头","PSS":"240","零件名称":"右前翼子板\n左前翼子板","零件件号_变更前":"","零件件号_变更后":"6608428872\n6608428873","钢板物料编码":"DC54D+Z 50/50 0.65*1105*435+1350","钢板物料名称":"S000001824","钢厂":"首钢","代理商编码":"270028","加工方式":"摆剪","品类":"钢板","料片形状":"梯形料","牌号":"DC54D+Z 50/50","表面质量":"FD","表面处理":"涂油","厚度_mm":"0.65","宽度_mm":"1105","上长度_mm":"1350","下长度_mm":"435","板料用量_PCS":"2","理论板料重量":"5.032","理论零件重量":"3.8868100000000005","称重板料重量":"4.915","称重零件重量":"3.645","大宗系统维护":"","备注":"PCR2504190077\n加摄像头孔","_row":34,"_category":"main","厚度_mm_num":0.65,"宽度_mm_num":1105,"理论板料重量_num":5.032,"理论零件重量_num":3.8868100000000005,"称重板料重量_num":4.915,"称重零件重量_num":3.645,"板料用量_PCS_num":2,"上长度_mm_num":1350,"下长度_mm_num":435,"材料利用率":77.2},{"车型":"FX11,FX11-J1,FX11-A2-G,N155-D.N155-D2","PSS":"271","零件名称":"顶盖外板","零件件号_变更前":"6608058410","零件件号_变更后":"6608558712","钢板物料编码":"HC180B 0.7*1340*2335","钢板物料名称":"S000002734","钢厂":"宝井","代理商编码":"574314","加工方式":"横切","品类":"钢板","料片形状":"方料","牌号":"HC180B","表面质量":"FD","表面处理":"涂油","厚度_mm":"0.7","宽度_mm":"1340","上长度_mm":"","下长度_mm":"2335","板料用量_PCS":"1.00","理论板料重量":"17.193","理论零件重量":"13.588","称重板料重量":"17.15","称重零件重量":"13.588","大宗系统维护":"","备注":"","_row":35,"_category":"main","厚度_mm_num":0.7,"宽度_mm_num":1340,"理论板料重量_num":17.193,"理论零件重量_num":13.588,"称重板料重量_num":17.15,"称重零件重量_num":13.588,"板料用量_PCS_num":1,"上长度_mm_num":null,"下长度_mm_num":2335,"材料利用率":79},{"车型":"FX11,FX11-J1,FX11-A2-G,FX11-A2,N155-D,N155-D2","PSS":"271","零件名称":"天窗顶盖外板","零件件号_变更前":"8891883677","零件件号_变更后":"6608558713","钢板物料编码":"HC180B 0.7*1340*2335","钢板物料名称":"S000002734","钢厂":"宝井","代理商编码":"574314","加工方式":"横切","品类":"钢板","料片形状":"方料","牌号":"HC180B","表面质量":"FD","表面处理":"涂油","厚度_mm":"0.7","宽度_mm":"1340","上长度_mm":"","下长度_mm":"2335","板料用量_PCS":"1.00","理论板料重量":"17.193","理论零件重量":"7.53667","称重板料重量":"17.15","称重零件重量":"7.1850000000000005","大宗系统维护":"","备注":"","_row":36,"_category":"main","厚度_mm_num":0.7,"宽度_mm_num":1340,"理论板料重量_num":17.193,"理论零件重量_num":7.53667,"称重板料重量_num":17.15,"称重零件重量_num":7.1850000000000005,"板料用量_PCS_num":1,"上长度_mm_num":null,"下长度_mm_num":2335,"材料利用率":43.8},{"车型":"FX11,FX11-J1,FX11-A2-G,FX11-A2,N155-D,N155-D2","PSS":"270","零件名称":"J1四驱前地板","零件件号_变更前":"","零件件号_变更后":"8892373765","钢板物料编码":"HC260LAD+Z 50/50 0.7*1430*1800","钢板物料名称":"S000002885","钢厂":"湖北汇通","代理商编码":"270028","加工方式":"横切","品类":"钢板","料片形状":"方料","牌号":"HC260LAD+Z","表面质量":"FB","表面处理":"涂油","厚度_mm":"0.7","宽度_mm":"1430","上长度_mm":"","下长度_mm":"1800","板料用量_PCS":"1.00","理论板料重量":"14.144","理论零件重量":"11.542","称重板料重量":"14.144","称重零件重量":"11.542","大宗系统维护":"","备注":"","_row":37,"_category":"main","厚度_mm_num":0.7,"宽度_mm_num":1430,"理论板料重量_num":14.144,"理论零件重量_num":11.542,"称重板料重量_num":14.144,"称重零件重量_num":11.542,"板料用量_PCS_num":1,"上长度_mm_num":null,"下长度_mm_num":1800,"材料利用率":81.6},{"车型":"FX11,FX11-J1,FX11-A2-G,FX11-A2,N155-D,N155-D2,FX11-A3","PSS":"270","零件名称":"备胎池面板","零件件号_变更前":"6608058410","零件件号_变更后":"6608479652","钢板物料编码":"DC04 0.7*1305*1825","钢板物料名称":"S000001392","钢厂":"宝井","代理商编码":"574314","加工方式":"横切","品类":"钢板","料片形状":"方料","牌号":"DC04","表面质量":"FB","表面处理":"涂油","厚度_mm":"0.7","宽度_mm":"1305","上长度_mm":"","下长度_mm":"1825","板料用量_PCS":"0.50","理论板料重量":"13.087","理论零件重量":"5.6693500000000006","称重板料重量":"12.82","称重零件重量":"5.2275","大宗系统维护":"","备注":"红色为降本后优化工艺孔，已挂接钢板号MPCR003102","_row":38,"_category":"main","厚度_mm_num":0.7,"宽度_mm_num":1305,"理论板料重量_num":13.087,"理论零件重量_num":5.6693500000000006,"称重板料重量_num":12.82,"称重零件重量_num":5.2275,"板料用量_PCS_num":0.5,"上长度_mm_num":null,"下长度_mm_num":1825,"材料利用率":43.3},{"车型":"FX11委外件FX11-J1，FX11-A2-G,N155-D,FX11-A2,N155-D2,FX11-A3","PSS":"270","零件名称":"前地板","零件件号_变更前":"","零件件号_变更后":"8892193947","钢板物料编码":"DC54D+Z 0.7*1485*1802","钢板物料名称":"S000001384","钢厂":"PR2509260014\n首钢变马钢","代理商编码":"委外件大宗系统无钢板信息","加工方式":"","品类":"","料片形状":"","牌号":"","表面质量":"","表面处理":"","厚度_mm":"","宽度_mm":"","上长度_mm":"","下长度_mm":"","板料用量_PCS":"","理论板料重量":"","理论零件重量":"11.184","称重板料重量":"","称重零件重量":"9.67","大宗系统维护":"","备注":"","_row":39,"_category":"main","厚度_mm_num":null,"宽度_mm_num":null,"理论板料重量_num":null,"理论零件重量_num":11.184,"称重板料重量_num":null,"称重零件重量_num":9.67,"板料用量_PCS_num":null,"上长度_mm_num":null,"下长度_mm_num":null,"材料利用率":null},{"车型":"FX11委外件FX11-J1，FX11-A2-G,G636,N155-D,FX11-A2,FX12-A2,FX11-A2-G,N155-D2,FX11-A3","PSS":"270","零件名称":"前围板","零件件号_变更前":"","零件件号_变更后":"6608345837","钢板物料编码":"HC260LAD+Z 1*1210*1690","钢板物料名称":"S000001393","钢厂":"","代理商编码":"","加工方式":"","品类":"","料片形状":"","牌号":"","表面质量":"","表面处理":"","厚度_mm":"","宽度_mm":"","上长度_mm":"","下长度_mm":"","板料用量_PCS":"","理论板料重量":"","理论零件重量":"3.997","称重板料重量":"","称重零件重量":"3.73","大宗系统维护":"","备注":"","_row":40,"_category":"main","厚度_mm_num":null,"宽度_mm_num":null,"理论板料重量_num":null,"理论零件重量_num":3.997,"称重板料重量_num":null,"称重零件重量_num":3.73,"板料用量_PCS_num":null,"上长度_mm_num":null,"下长度_mm_num":null,"材料利用率":null},{"车型":"委外件FX11-J1,FX11-A2-G,N155-D,FX11-A2.N155-D2,FX11-A3","PSS":"270","零件名称":"中地板本体","零件件号_变更前":"","零件件号_变更后":"8891730593","钢板物料编码":"DC04 0.7*1720*1700","钢板物料名称":"S000001403","钢厂":"","代理商编码":"","加工方式":"","品类":"","料片形状":"","牌号":"","表面质量":"","表面处理":"","厚度_mm":"","宽度_mm":"","上长度_mm":"","下长度_mm":"","板料用量_PCS":"","理论板料重量":"","理论零件重量":"6.146","称重板料重量":"","称重零件重量":"5.63","大宗系统维护":"","备注":"","_row":41,"_category":"main","厚度_mm_num":null,"宽度_mm_num":null,"理论板料重量_num":null,"理论零件重量_num":6.146,"称重板料重量_num":null,"称重零件重量_num":5.63,"板料用量_PCS_num":null,"上长度_mm_num":null,"下长度_mm_num":null,"材料利用率":null},{"车型":"FX12-A2","PSS":"240","零件名称":"发动机罩外板","零件件号_变更前":"","零件件号_变更后":"6608285804","钢板物料编码":"HC180BD+ZM 35/35 0.65*1860*1420","钢板物料名称":"S000003541","钢厂":"首钢","代理商编码":"270028","加工方式":"横切","品类":"钢板","料片形状":"弧形料","牌号":"HC180BD+ZM 35/35","表面质量":"FD","表面处理":"涂油","厚度_mm":"0.65","宽度_mm":"1860","上长度_mm":"1420","下长度_mm":"","板料用量_PCS":"1","理论板料重量":"13.477","理论零件重量":"9.27837","称重板料重量":"12.93","称重零件重量":"8.456666666666667","大宗系统维护":"","备注":"","_row":42,"_category":"main","厚度_mm_num":0.65,"宽度_mm_num":1860,"理论板料重量_num":13.477,"理论零件重量_num":9.27837,"称重板料重量_num":12.93,"称重零件重量_num":8.456666666666667,"板料用量_PCS_num":1,"上长度_mm_num":1420,"下长度_mm_num":null,"材料利用率":68.8},{"车型":"FX12-A2","PSS":"240","零件名称":"发动机罩内板","零件件号_变更前":"","零件件号_变更后":"6608285805","钢板物料编码":"DC54D+ZM 35/35 0.60*1840*1365","钢板物料名称":"S000003758","钢厂":"首钢","代理商编码":"270028","加工方式":"横切","品类":"钢板","料片形状":"弧形料","牌号":"DC54D+ZM 35/35","表面质量":"FB","表面处理":"涂油","厚度_mm":"0.6","宽度_mm":"1840","上长度_mm":"1365","下长度_mm":"","板料用量_PCS":"1","理论板料重量":"11.83","理论零件重量":"7.68325","称重板料重量":"11.355","称重零件重量":"6.702500000000001","大宗系统维护":"","备注":"","_row":43,"_category":"main","厚度_mm_num":0.6,"宽度_mm_num":1840,"理论板料重量_num":11.83,"理论零件重量_num":7.68325,"称重板料重量_num":11.355,"称重零件重量_num":6.702500000000001,"板料用量_PCS_num":1,"上长度_mm_num":1365,"下长度_mm_num":null,"材料利用率":64.9},{"车型":"FX12-A2","PSS":"230","零件名称":"后背门上外板","零件件号_变更前":"","零件件号_变更后":"6608287632","钢板物料编码":"DC56D+ZM 35/35 0.65*1660*1075","钢板物料名称":"S000003539","钢厂":"宝钢","代理商编码":"574314","加工方式":"横切","品类":"钢板","料片形状":"方料","牌号":"DC56D+ZM 35/35","表面质量":"FD","表面处理":"涂油","厚度_mm":"0.65","宽度_mm":"1660","上长度_mm":"1075","下长度_mm":"","板料用量_PCS":"1","理论板料重量":"9.105","理论零件重量":"4.02616","称重板料重量":"9.13","称重零件重量":"3.335","大宗系统维护":"","备注":"","_row":44,"_category":"main","厚度_mm_num":0.65,"宽度_mm_num":1660,"理论板料重量_num":9.105,"理论零件重量_num":4.02616,"称重板料重量_num":9.13,"称重零件重量_num":3.335,"板料用量_PCS_num":1,"上长度_mm_num":1075,"下长度_mm_num":null,"材料利用率":44.2},{"车型":"FX12-A2","PSS":"230","零件名称":"后背门下外板","零件件号_变更前":"","零件件号_变更后":"6608287626","钢板物料编码":"DC07E+Z 45/45 0.70*1595*719","钢板物料名称":"S000003538","钢厂":"宝钢","代理商编码":"574314","加工方式":"横切","品类":"钢板","料片形状":"方料","牌号":"DC07E+Z 45/45","表面质量":"FD","表面处理":"涂油","厚度_mm":"0.7","宽度_mm":"1595","上长度_mm":"719","下长度_mm":"","板料用量_PCS":"1","理论板料重量":"6.302","理论零件重量":"3.62994","称重板料重量":"6.185","称重零件重量":"6.702500000000001","大宗系统维护":"","备注":"","_row":45,"_category":"main","厚度_mm_num":0.7,"宽度_mm_num":1595,"理论板料重量_num":6.302,"理论零件重量_num":3.62994,"称重板料重量_num":6.185,"称重零件重量_num":6.702500000000001,"板料用量_PCS_num":1,"上长度_mm_num":719,"下长度_mm_num":null,"材料利用率":57.6},{"车型":"FX12-A2","PSS":"230","零件名称":"后背门内板","零件件号_变更前":"","零件件号_变更后":"6608287614","钢板物料编码":"DC56D+ZM 35/35 0.65*1697*1460","钢板物料名称":"S000003757","钢厂":"首钢","代理商编码":"270028","加工方式":"落料","品类":"钢板","料片形状":"落料","牌号":"DC56D+ZM 35/35","表面质量":"FB","表面处理":"涂油","厚度_mm":"0.65","宽度_mm":"1697","上长度_mm":"1460","下长度_mm":"","板料用量_PCS":"1","理论板料重量":"12.465","理论零件重量":"6.165","称重板料重量":"12.02","称重零件重量":"5.385","大宗系统维护":"","备注":"实际重量：12.465","_row":46,"_category":"main","厚度_mm_num":0.65,"宽度_mm_num":1697,"理论板料重量_num":12.465,"理论零件重量_num":6.165,"称重板料重量_num":12.02,"称重零件重量_num":5.385,"板料用量_PCS_num":1,"上长度_mm_num":1460,"下长度_mm_num":null,"材料利用率":49.5},{"车型":"FX12-A2","PSS":"271","零件名称":"天窗顶盖外板","零件件号_变更前":"","零件件号_变更后":"6608422948","钢板物料编码":"HC180B 0.7*1340*2335","钢板物料名称":"S000002734","钢厂":"宝钢/青岛海利尔","代理商编码":"574314\t\n532041","加工方式":"横切","品类":"钢板","料片形状":"方料","牌号":"HC180B","表面质量":"FD","表面处理":"涂油","厚度_mm":"0.7","宽度_mm":"1340","上长度_mm":"2335","下长度_mm":"","板料用量_PCS":"","理论板料重量":"17.193","理论零件重量":"7.47692","称重板料重量":"17.15","称重零件重量":"7.015","大宗系统维护":"","备注":"PCR2503310147\n减鲨鱼鳍","_row":47,"_category":"main","厚度_mm_num":0.7,"宽度_mm_num":1340,"理论板料重量_num":17.193,"理论零件重量_num":7.47692,"称重板料重量_num":17.15,"称重零件重量_num":7.015,"板料用量_PCS_num":null,"上长度_mm_num":2335,"下长度_mm_num":null,"材料利用率":43.5},{"车型":"FX11-A3","PSS":"271","零件名称":"顶盖外板","零件件号_变更前":"","零件件号_变更后":"6608559795","钢板物料编码":"HC180B 0.7*1340*2335","钢板物料名称":"S000002734","钢厂":"宝井","代理商编码":"574314","加工方式":"横切","品类":"钢板","料片形状":"方料","牌号":"HC180B","表面质量":"FD","表面处理":"涂油","厚度_mm":"","宽度_mm":"","上长度_mm":"","下长度_mm":"","板料用量_PCS":"","理论板料重量":"","理论零件重量":"","称重板料重量":"","称重零件重量":"","大宗系统维护":"","备注":"","_row":60,"_category":"main","厚度_mm_num":null,"宽度_mm_num":null,"理论板料重量_num":null,"理论零件重量_num":null,"称重板料重量_num":null,"称重零件重量_num":null,"板料用量_PCS_num":null,"上长度_mm_num":null,"下长度_mm_num":null,"材料利用率":null},{"车型":"FX11-A3","PSS":"271","零件名称":"天窗顶盖外板","零件件号_变更前":"","零件件号_变更后":"6608559794","钢板物料编码":"HC180B 0.7*1340*2335","钢板物料名称":"S000002734","钢厂":"宝井","代理商编码":"574314","加工方式":"横切","品类":"钢板","料片形状":"方料","牌号":"HC180B","表面质量":"FD","表面处理":"涂油","厚度_mm":"","宽度_mm":"","上长度_mm":"","下长度_mm":"","板料用量_PCS":"","理论板料重量":"","理论零件重量":"","称重板料重量":"","称重零件重量":"","大宗系统维护":"","备注":"","_row":60,"_category":"main","厚度_mm_num":null,"宽度_mm_num":null,"理论板料重量_num":null,"理论零件重量_num":null,"称重板料重量_num":null,"称重零件重量_num":null,"板料用量_PCS_num":null,"上长度_mm_num":null,"下长度_mm_num":null,"材料利用率":null},{"车型":"FX11-G,FX11-A3","PSS":"271","零件名称":"顶盖外板(天窗)","零件件号_变更前":"","零件件号_变更后":"6608711294","钢板物料编码":"HC180B 0.7*1340*2335","钢板物料名称":"S000002734","钢厂":"","代理商编码":"","加工方式":"","品类":"","料片形状":"","牌号":"","表面质量":"","表面处理":"","厚度_mm":"","宽度_mm":"","上长度_mm":"","下长度_mm":"","板料用量_PCS":"","理论板料重量":"17.193","理论零件重量":"7.542","称重板料重量":"17.15","称重零件重量":"","大宗系统维护":"","备注":"","_row":60,"_category":"main","厚度_mm_num":null,"宽度_mm_num":null,"理论板料重量_num":17.193,"理论零件重量_num":7.542,"称重板料重量_num":17.15,"称重零件重量_num":null,"板料用量_PCS_num":null,"上长度_mm_num":null,"下长度_mm_num":null,"材料利用率":43.9},{"车型":"P166","PSS":"240","零件名称":"发动机罩内板","零件件号_变更前":"","零件件号_变更后":"6608434080","钢板物料编码":"DC54D+Z 50/500.6*1820*1310（R2400）","钢板物料名称":"S000004015","钢厂":"首钢（汇通）","代理商编码":"270028","加工方式":"落料","品类":"钢板","料片形状":"弧形料","牌号":"DC54D+Z 50/50","表面质量":"FB","表面处理":"涂油","厚度_mm":"0.6","宽度_mm":"1820","上长度_mm":"","下长度_mm":"1310","板料用量_PCS":"","理论板料重量":"11.230","理论零件重量":"8.066","称重板料重量":"11.229582","称重零件重量":"","大宗系统维护":"","备注":"","_row":61,"_category":"main","厚度_mm_num":0.6,"宽度_mm_num":1820,"理论板料重量_num":11.23,"理论零件重量_num":8.066,"称重板料重量_num":11.229582,"称重零件重量_num":null,"板料用量_PCS_num":null,"上长度_mm_num":null,"下长度_mm_num":1310,"材料利用率":71.8},{"车型":"P166","PSS":"240","零件名称":"发动机罩外板","零件件号_变更前":"","零件件号_变更后":"6608434079","钢板物料编码":"HC180BD+Z0.65*1850*1405（R2400）","钢板物料名称":"S000004010","钢厂":"首钢（汇通）","代理商编码":"270028","加工方式":"落料","品类":"钢板","料片形状":"弧形料","牌号":"HC180BD+Z","表面质量":"FD","表面处理":"涂油","厚度_mm":"0.65","宽度_mm":"1850","上长度_mm":"","下长度_mm":"1405","板料用量_PCS":"","理论板料重量":"13.263","理论零件重量":"9.906","称重板料重量":"13.262673125","称重零件重量":"","大宗系统维护":"","备注":"","_row":61,"_category":"main","厚度_mm_num":0.65,"宽度_mm_num":1850,"理论板料重量_num":13.263,"理论零件重量_num":9.906,"称重板料重量_num":13.262673125,"称重零件重量_num":null,"板料用量_PCS_num":null,"上长度_mm_num":null,"下长度_mm_num":1405,"材料利用率":74.7},{"车型":"P166","PSS":"230","零件名称":"背门上外板","零件件号_变更前":"","零件件号_变更后":"6608434097","钢板物料编码":"DC54D+Z50/50 0.65*1068*1555","钢板物料名称":"S000004014","钢厂":"首钢（汇通）","代理商编码":"270028","加工方式":"横切","品类":"钢板","料片形状":"方形料","牌号":"DC54D+Z 50/50","表面质量":"FD","表面处理":"涂油","厚度_mm":"0.65","宽度_mm":"1068","上长度_mm":"","下长度_mm":"1555","板料用量_PCS":"","理论板料重量":"8.474","理论零件重量":"3.864","称重板料重量":"8.473925849999999","称重零件重量":"","大宗系统维护":"","备注":"","_row":61,"_category":"main","厚度_mm_num":0.65,"宽度_mm_num":1068,"理论板料重量_num":8.474,"理论零件重量_num":3.864,"称重板料重量_num":8.473925849999999,"称重零件重量_num":null,"板料用量_PCS_num":null,"上长度_mm_num":null,"下长度_mm_num":1555,"材料利用率":45.6},{"车型":"P166","PSS":"230","零件名称":"背门下外板","零件件号_变更前":"","零件件号_变更后":"6608434095","钢板物料编码":"DC56D+Z 50/50 0.65*1580*658","钢板物料名称":"S000004013","钢厂":"首钢（汇通）","代理商编码":"270028","加工方式":"横切","品类":"钢板","料片形状":"方形料","牌号":"DC56D+Z 50/50","表面质量":"FD","表面处理":"涂油","厚度_mm":"0.65","宽度_mm":"1580","上长度_mm":"","下长度_mm":"658","板料用量_PCS":"","理论板料重量":"5.305","理论零件重量":"2.875","称重板料重量":"5.3047631","称重零件重量":"","大宗系统维护":"","备注":"","_row":61,"_category":"main","厚度_mm_num":0.65,"宽度_mm_num":1580,"理论板料重量_num":5.305,"理论零件重量_num":2.875,"称重板料重量_num":5.3047631,"称重零件重量_num":null,"板料用量_PCS_num":null,"上长度_mm_num":null,"下长度_mm_num":658,"材料利用率":54.2},{"车型":"P166","PSS":"230","零件名称":"背门内板","零件件号_变更前":"","零件件号_变更后":"6608434094","钢板物料编码":"DC56D+ZM35/35 0.65*1445*1650","钢板物料名称":"S000003980","钢厂":"首钢（汇通）","代理商编码":"270028","加工方式":"落料","品类":"钢板","料片形状":"落料","牌号":"DC56D+Z 50/50","表面质量":"FB","表面处理":"涂油","厚度_mm":"0.65","宽度_mm":"1445","上长度_mm":"","下长度_mm":"1650","板料用量_PCS":"","理论板料重量":"11.460","理论零件重量":"6.153","称重板料重量":"11.46","称重零件重量":"","大宗系统维护":"","备注":"","_row":61,"_category":"main","厚度_mm_num":0.65,"宽度_mm_num":1445,"理论板料重量_num":11.46,"理论零件重量_num":6.153,"称重板料重量_num":11.46,"称重零件重量_num":null,"板料用量_PCS_num":null,"上长度_mm_num":null,"下长度_mm_num":1650,"材料利用率":53.7},{"车型":"P166","PSS":"240","零件名称":"左/右翼子板（高配）","零件件号_变更前":"","零件件号_变更后":"6608434082/6608434084","钢板物料编码":"DC54D+Z 50/500.65*1183*(507/1278)","钢板物料名称":"S000004018S000004019","钢厂":"首钢（汇通）","代理商编码":"270028","加工方式":"摆剪","品类":"钢板","料片形状":"梯形料","牌号":"DC54D+Z 50/50","表面质量":"FD","表面处理":"涂油","厚度_mm":"0.65","宽度_mm":"1183","上长度_mm":"","下长度_mm":"","板料用量_PCS":"","理论板料重量":"5.387","理论零件重量":"","称重板料重量":"","称重零件重量":"","大宗系统维护":"","备注":"","_row":61,"_category":"main","厚度_mm_num":0.65,"宽度_mm_num":1183,"理论板料重量_num":5.387,"理论零件重量_num":null,"称重板料重量_num":null,"称重零件重量_num":null,"板料用量_PCS_num":null,"上长度_mm_num":null,"下长度_mm_num":null,"材料利用率":null},{"车型":"P166","PSS":"240","零件名称":"左/右翼子板（低配）","零件件号_变更前":"","零件件号_变更后":"6608434083/6608434081","钢板物料编码":"DC54D+Z 50/500.65*1183*(507/1278)","钢板物料名称":"S000004018S000004019","钢厂":"首钢（汇通）","代理商编码":"270028","加工方式":"摆剪","品类":"钢板","料片形状":"梯形料","牌号":"DC54D+Z 50/50","表面质量":"FD","表面处理":"涂油","厚度_mm":"0.65","宽度_mm":"1183","上长度_mm":"","下长度_mm":"","板料用量_PCS":"","理论板料重量":"5.387","理论零件重量":"","称重板料重量":"","称重零件重量":"","大宗系统维护":"","备注":"","_row":61,"_category":"main","厚度_mm_num":0.65,"宽度_mm_num":1183,"理论板料重量_num":5.387,"理论零件重量_num":null,"称重板料重量_num":null,"称重零件重量_num":null,"板料用量_PCS_num":null,"上长度_mm_num":null,"下长度_mm_num":null,"材料利用率":null},{"车型":"P166","PSS":"271","零件名称":"顶盖外板","零件件号_变更前":"","零件件号_变更后":"6608583623","钢板物料编码":"HC180B0.65*1475*2510","钢板物料名称":"S000004016","钢厂":"首钢（汇通）","代理商编码":"270028","加工方式":"横切","品类":"钢板","料片形状":"方形料","牌号":"HC180B","表面质量":"FD","表面处理":"涂油","厚度_mm":"0.65","宽度_mm":"1475","上长度_mm":"","下长度_mm":"2510","板料用量_PCS":"","理论板料重量":"18.891","理论零件重量":"12.107","称重板料重量":"18.890730625","称重零件重量":"","大宗系统维护":"","备注":"","_row":61,"_category":"main","厚度_mm_num":0.65,"宽度_mm_num":1475,"理论板料重量_num":18.891,"理论零件重量_num":12.107,"称重板料重量_num":18.890730625,"称重零件重量_num":null,"板料用量_PCS_num":null,"上长度_mm_num":null,"下长度_mm_num":2510,"材料利用率":64.1},{"车型":"P166","PSS":"271","零件名称":"左侧围外板","零件件号_变更前":"","零件件号_变更后":"6608243093","钢板物料编码":"DC56D+Z 50/500.65*1705*3519","钢板物料名称":"S000004020","钢厂":"首钢（汇通）","代理商编码":"270028","加工方式":"落料","品类":"钢板","料片形状":"落料","牌号":"DC56D+Z 50/50","表面质量":"FD","表面处理":"涂油","厚度_mm":"0.65","宽度_mm":"1705","上长度_mm":"","下长度_mm":"","板料用量_PCS":"","理论板料重量":"24.720","理论零件重量":"12.917","称重板料重量":"24.7203","称重零件重量":"","大宗系统维护":"","备注":"","_row":61,"_category":"main","厚度_mm_num":0.65,"宽度_mm_num":1705,"理论板料重量_num":24.72,"理论零件重量_num":12.917,"称重板料重量_num":24.7203,"称重零件重量_num":null,"板料用量_PCS_num":null,"上长度_mm_num":null,"下长度_mm_num":null,"材料利用率":52.3},{"车型":"P166","PSS":"271","零件名称":"右侧围外板","零件件号_变更前":"","零件件号_变更后":"6608243094","钢板物料编码":"DC56D+Z 50/500.65*1705*3519","钢板物料名称":"S000004021","钢厂":"首钢（汇通）","代理商编码":"270028","加工方式":"落料","品类":"钢板","料片形状":"落料","牌号":"DC56D+Z 50/50","表面质量":"FD","表面处理":"涂油","厚度_mm":"0.65","宽度_mm":"1705","上长度_mm":"","下长度_mm":"","板料用量_PCS":"","理论板料重量":"24.720","理论零件重量":"12.954","称重板料重量":"24.7203","称重零件重量":"","大宗系统维护":"","备注":"","_row":61,"_category":"main","厚度_mm_num":0.65,"宽度_mm_num":1705,"理论板料重量_num":24.72,"理论零件重量_num":12.954,"称重板料重量_num":24.7203,"称重零件重量_num":null,"板料用量_PCS_num":null,"上长度_mm_num":null,"下长度_mm_num":null,"材料利用率":52.4},{"车型":"P166","PSS":"270","零件名称":"后地板","零件件号_变更前":"","零件件号_变更后":"6608363770","钢板物料编码":"DC54D+Z 50/500.6*952*1998","钢板物料名称":"S000004017","钢厂":"浙江绿草地材料科技有限公司","代理商编码":"573012","加工方式":"横切","品类":"钢板","料片形状":"方形料","牌号":"DC54D+Z 50/50","表面质量":"FB","表面处理":"涂油","厚度_mm":"0.6","宽度_mm":"952","上长度_mm":"","下长度_mm":"1998","板料用量_PCS":"","理论板料重量":"8.959","理论零件重量":"3.861","称重板料重量":"8.958872159999999","称重零件重量":"","大宗系统维护":"","备注":"","_row":61,"_category":"main","厚度_mm_num":0.6,"宽度_mm_num":952,"理论板料重量_num":8.959,"理论零件重量_num":3.861,"称重板料重量_num":8.958872159999999,"称重零件重量_num":null,"板料用量_PCS_num":null,"上长度_mm_num":null,"下长度_mm_num":1998,"材料利用率":43.1}];
+let filteredData = [...allData];
+let currentPage = 1;
+let pageSize = 20;
+let sortCol = null;
+let sortAsc = true;
+let editingId = null;
+let charts = {};
+
+// Load from localStorage
+function loadData() {
+  const saved = localStorage.getItem('stamping_data');
+  if (saved) {
+    try {
+      const parsed = JSON.parse(saved);
+      if (parsed.length > 0) allData = parsed;
+    } catch(e) {}
+  }
+}
+
+// ===== Password Management =====
+let isUnlocked = false;
+let pwdCallback = null;
+let pwdMode = 'verify'; // 'set' | 'verify' | 'change'
+
+function sha256(msg) {
+  function utf8Encode(s) { return unescape(encodeURIComponent(s)); }
+  msg = utf8Encode(msg);
+  const K = [0x428a2f98,0x71374491,0xb5c0fbcf,0xe9b5dba5,0x3956c25b,0x59f111f1,0x923f82a4,0xab1c5ed5,0xd807aa98,0x12835b01,0x243185be,0x550c7dc3,0x72be5d74,0x80deb1fe,0x9bdc06a7,0xc19bf174,0xe49b69c1,0xefbe4786,0x0fc19dc6,0x240ca1cc,0x2de92c6f,0x4a7484aa,0x5cb0a9dc,0x76f988da,0x983e5152,0xa831c66d,0xb00327c8,0xbf597fc7,0xc6e00bf3,0xd5a79147,0x06ca6351,0x14292967,0x27b70a85,0x2e1b2138,0x4d2c6dfc,0x53380d13,0x650a7354,0x766a0abb,0x81c2c92e,0x92722c85,0xa2bfe8a1,0xa81a664b,0xc24b8b70,0xc76c51a3,0xd192e819,0xd6990624,0xf40e3585,0x106aa070,0x19a4c116,0x1e376c08,0x2748774c,0x34b0bcb5,0x391c0cb3,0x4ed8aa4a,0x5b9cca4f,0x682e6ff3,0x748f82ee,0x78a5636f,0x84c87814,0x8cc70208,0x90befffa,0xa4506ceb,0xbef9a3f7,0xc67178f2];
+  let msgBits = []; for (let i = 0; i < msg.length; i++) { msgBits.push(msg.charCodeAt(i) << 24); msgBits.push(msg.charCodeAt(i) << 16); msgBits.push(msg.charCodeAt(i) << 8); msgBits.push(msg.charCodeAt(i)); }
+  let l = msgBits.length; msgBits.push(0x80);
+  while ((msgBits.length / 4) % 64 !== 56) msgBits.push(0);
+  let bitLen = l * 8;
+  let hi = Math.floor(bitLen / Math.pow(2,32)), lo = bitLen >>> 0;
+  msgBits.push((hi >>> 24) & 0xff); msgBits.push((hi >>> 16) & 0xff); msgBits.push((hi >>> 8) & 0xff); msgBits.push(hi & 0xff);
+  msgBits.push((lo >>> 24) & 0xff); msgBits.push((lo >>> 16) & 0xff); msgBits.push((lo >>> 8) & 0xff); msgBits.push(lo & 0xff);
+  let words = []; for (let i = 0; i < msgBits.length; i += 4) words.push((msgBits[i] << 24) | (msgBits[i+1] << 16) | (msgBits[i+2] << 8) | msgBits[i+3]);
+  let H = [0x6a09e667,0xbb67ae85,0x3c6ef372,0xa54ff53a,0x510e527f,0x9b05688c,0x1f83d9ab,0x5be0cd19];
+  for (let i = 0; i < words.length; i += 16) {
+    let W = words.slice(i, i+16);
+    for (let t = 16; t < 64; t++) {
+      let s0 = (W[t-15] >>> 7 | W[t-15] << 25) ^ (W[t-15] >>> 18 | W[t-15] << 14) ^ (W[t-15] >>> 3);
+      let s1 = (W[t-2] >>> 17 | W[t-2] << 15) ^ (W[t-2] >>> 19 | W[t-2] << 13) ^ (W[t-2] >>> 10);
+      W[t] = (W[t-16] + s0 + W[t-7] + s1) >>> 0;
+    }
+    let [a,b,c,d,e,f,g,h] = H;
+    for (let t = 0; t < 64; t++) {
+      let S1 = (e >>> 6 | e << 26) ^ (e >>> 11 | e << 21) ^ (e >>> 25 | e << 7);
+      let ch = (e & f) ^ (~e & g);
+      let T1 = (h + S1 + ch + K[t] + W[t]) >>> 0;
+      let S0 = (a >>> 2 | a << 30) ^ (a >>> 13 | a << 19) ^ (a >>> 22 | a << 10);
+      let maj = (a & b) ^ (a & c) ^ (b & c);
+      let T2 = (S0 + maj) >>> 0;
+      h = g; g = f; f = e; e = (d + T1) >>> 0; d = c; c = b; b = a; a = (T1 + T2) >>> 0;
+    }
+    H = [H[0]+a>>>0, H[1]+b>>>0, H[2]+c>>>0, H[3]+d>>>0, H[4]+e>>>0, H[5]+f>>>0, H[6]+g>>>0, H[7]+h>>>0];
+  }
+  return H.map(x => ('00000000' + x.toString(16)).slice(-8)).join('');
+}
+
+function getPasswordHash() { return localStorage.getItem('stamping_pwd_hash') || ''; }
+function setPasswordHash(h) { localStorage.setItem('stamping_pwd_hash', h); }
+
+function requireAuth(callback) {
+  if (isUnlocked) { callback(); return; }
+  const hash = getPasswordHash();
+  if (!hash) {
+    pwdMode = 'set';
+    document.getElementById('pwdTitle').textContent = '🔐 设置编辑密码';
+    document.getElementById('pwdSub').textContent = '首次使用，请设置一个密码（至少4位）';
+    document.getElementById('pwdConfirmBtn').textContent = '设置密码';
+  } else {
+    pwdMode = 'verify';
+    document.getElementById('pwdTitle').textContent = '🔐 请输入编辑密码';
+    document.getElementById('pwdSub').textContent = '需要验证密码后才能编辑数据';
+    document.getElementById('pwdConfirmBtn').textContent = '确认';
+  }
+  document.getElementById('pwdInput').value = '';
+  document.getElementById('pwdError').style.display = 'none';
+  document.getElementById('pwdOverlay').classList.add('show');
+  document.getElementById('pwdInput').focus();
+  pwdCallback = callback;
+}
+
+function verifyPassword() {
+  const input = document.getElementById('pwdInput').value;
+  if (pwdMode === 'set') {
+    if (input.length < 4) {
+      document.getElementById('pwdError').textContent = '密码至少需要4位';
+      document.getElementById('pwdError').style.display = 'block';
+      return;
+    }
+    setPasswordHash(sha256(input));
+    isUnlocked = true;
+    updateLockUI();
+    closePwdModal();
+    toast('🔐 密码已设置，当前为编辑模式');
+    if (pwdCallback) { pwdCallback(); pwdCallback = null; }
+  } else {
+    const hash = getPasswordHash();
+    if (sha256(input) === hash) {
+      isUnlocked = true;
+      updateLockUI();
+      closePwdModal();
+      toast('✅ 已解锁编辑模式');
+      if (pwdCallback) { pwdCallback(); pwdCallback = null; }
+    } else {
+      document.getElementById('pwdError').style.display = 'block';
+      document.getElementById('pwdInput').value = '';
+      document.getElementById('pwdInput').focus();
+    }
+  }
+}
+
+function closePwdModal() {
+  document.getElementById('pwdOverlay').classList.remove('show');
+  pwdCallback = null;
+}
+
+function toggleLock() {
+  if (isUnlocked) {
+    isUnlocked = false;
+    updateLockUI();
+    toast('🔒 已锁定，编辑功能已禁用');
+  } else {
+    requireAuth(function() {});
+  }
+}
+
+function updateLockUI() {
+  const btn = document.getElementById('lockBtn');
+  const addBtn = document.getElementById('btnAdd');
+  const saveBtn = document.getElementById('btnSave');
+  const pubBtn = document.getElementById('btnPublish');
+  if (isUnlocked) {
+    btn.className = 'lock-btn unlocked';
+    btn.innerHTML = '🔓 编辑模式';
+    btn.title = '点击锁定';
+    addBtn.disabled = false; addBtn.style.opacity = '1';
+    saveBtn.disabled = false; saveBtn.style.opacity = '1';
+    if (pubBtn) { pubBtn.disabled = false; pubBtn.style.opacity = '1'; }
+  } else {
+    btn.className = 'lock-btn locked';
+    btn.innerHTML = '🔒 只读模式';
+    btn.title = '点击解锁以编辑数据';
+    addBtn.disabled = true; addBtn.style.opacity = '0.5';
+    saveBtn.disabled = true; saveBtn.style.opacity = '0.5';
+    if (pubBtn) { pubBtn.disabled = true; pubBtn.style.opacity = '0.5'; }
+  }
+}
+
+function changePassword() {
+  if (!isUnlocked) {
+    requireAuth(changePassword);
+    return;
+  }
+  const oldPwd = prompt('请输入当前密码：');
+  if (!oldPwd) return;
+  if (sha256(oldPwd) !== getPasswordHash()) {
+    toast('当前密码错误', true);
+    return;
+  }
+  const newPwd = prompt('请输入新密码（至少4位）：');
+  if (!newPwd || newPwd.length < 4) {
+    toast('新密码至少需要4位', true);
+    return;
+  }
+  setPasswordHash(sha256(newPwd));
+  toast('🔐 密码已更新');
+}
+
+function publishToGitHub() {
+  if (!isUnlocked) { requireAuth(publishToGitHub); return; }
+  const GH_TOKEN = 'ghp_Aa…C8bO';
+  const GH_OWNER = 'allenmi1';
+  const GH_REPO = 'stamping-dashboard';
+  const btn = document.getElementById('btnPublish');
+  btn.disabled = true; btn.textContent = '⏳ 发布中...';
+  
+  // Step 1: Get current SHA
+  fetch(`https://api.github.com/repos/${GH_OWNER}/${GH_REPO}/contents/index.html`, {
+    headers: { 'Authorization': `Bearer ${GH_TOKEN}', 'Accept': 'application/vnd.github+json' }
+  })
+  .then(r => r.json())
+  .then(data => {
+    if (!data.sha) throw new Error('无法获取远程文件信息');
+    const sha = data.sha;
+    
+    // Step 2: Build updated HTML with current data
+    let html = document.documentElement.outerHTML;
+    const dataStr = JSON.stringify(allData);
+    const regex = /let allData = \[.*?\];/s;
+    if (regex.test(html)) {
+      html = html.replace(regex, 'let allData = ' + dataStr + ';');
+    }
+    html = '<!DOCTYPE html>\n' + html.substring(html.indexOf('<html'));
+    const b64 = btoa(unescape(encodeURIComponent(html)));
+    
+    // Step 3: Upload to GitHub
+    return fetch(`https://api.github.com/repos/${GH_OWNER}/${GH_REPO}/contents/index.html`, {
+      method: 'PUT',
+      headers: { 'Authorization': `Bearer ${GH_TOKEN}', 'Accept': 'application/vnd.github+json', 'Content-Type': 'application/json' },
+      body: JSON.stringify({ message: 'Update dashboard', content: b64, sha: sha, branch: 'main' })
+    });
+  })
+  .then(r => r.json())
+  .then(data => {
+    if (data.content) {
+      toast('🚀 发布成功! 30秒后刷新网站即可看到更新');
+      btn.textContent = '✅ 已发布';
+      setTimeout(() => { btn.textContent = '🚀 发布到网站'; btn.disabled = false; }, 3000);
+    } else {
+      throw new Error(data.message || '发布失败');
+    }
+  })
+  .catch(err => {
+    toast('发布失败: ' + err.message, true);
+    btn.textContent = '🚀 发布到网站'; btn.disabled = false;
+  });
+}
+
+function saveToStorage() {
+  localStorage.setItem('stamping_data', JSON.stringify(allData));
+}
+
+function getUtilization(d) {
+  if (d['理论板料重量_num'] && d['理论零件重量_num'] && d['理论板料重量_num'] > 0)
+    return (d['理论零件重量_num'] / d['理论板料重量_num'] * 100).toFixed(1);
+  if (d['称重板料重量_num'] && d['称重零件重量_num'] && d['称重板料重量_num'] > 0)
+    return (d['称重零件重量_num'] / d['称重板料重量_num'] * 100).toFixed(1);
+  return '';
+}
+
+function getUtilClass(v) {
+  if (!v) return '';
+  const n = parseFloat(v);
+  if (n >= 65) return 'util-high';
+  if (n >= 50) return 'util-mid';
+  return 'util-low';
+}
+
+function getCellValue(d, col) {
+  if (col === '材料利用率') return getUtilization(d);
+  return d[col] || '';
+}
+
+function toast(msg, isError) {
+  const t = document.getElementById('toast');
+  t.textContent = msg;
+  t.className = 'toast' + (isError ? ' error' : '');
+  t.style.display = 'block';
+  setTimeout(() => t.style.display = 'none', 2500);
+}
+
+// Populate filters
+function populateFilters() {
+  const models = new Set(), pssSet = new Set(), cats = new Set();
+  allData.forEach(d => {
+    d['车型'].replace(/\n/g,',').split(',').forEach(m => { const t=m.trim(); if(t) models.add(t); });
+    if (d['PSS'].trim()) pssSet.add(d['PSS'].trim());
+    if (d['_category']) cats.add(d['_category']);
+  });
+  const fill = (id, items) => {
+    const sel = document.getElementById(id);
+    const existing = new Set(Array.from(sel.options).map(o=>o.value));
+    Array.from(items).sort().forEach(v => { if (!existing.has(v)) sel.add(new Option(v, v)); });
+  };
+  fill('filterModel', models);
+  fill('filterPSS', pssSet);
+  fill('filterCategory', cats);
+  document.getElementById('tableCount').textContent = allData.length;
+}
+
+// Filter
+function filterTable() {
+  const search = document.getElementById('searchInput').value.toLowerCase();
+  const model = document.getElementById('filterModel').value;
+  const pss = document.getElementById('filterPSS').value;
+  const cat = document.getElementById('filterCategory').value;
+  filteredData = allData.filter(d => {
+    if (model && !d['车型'].includes(model)) return false;
+    if (pss && d['PSS'].trim() !== pss) return false;
+    if (cat && d['_category'] !== cat) return false;
+    if (search) {
+      const hay = Object.values(d).join(' ').toLowerCase();
+      return hay.includes(search);
+    }
+    return true;
+  });
+  currentPage = 1;
+  renderTable();
+}
+
+// Sort
+function sortTable(col) {
+  if (sortCol === col) { sortAsc = !sortAsc; }
+  else { sortCol = col; sortAsc = true; }
+  filteredData.sort((a,b) => {
+    const va = (a[col]||'').toString().toLowerCase();
+    const vb = (b[col]||'').toString().toLowerCase();
+    const na = parseFloat(va), nb = parseFloat(vb);
+    if (!isNaN(na) && !isNaN(nb)) return sortAsc ? na - nb : nb - na;
+    return sortAsc ? va.localeCompare(vb) : vb.localeCompare(va);
+  });
+  renderTable();
+}
+
+// Render table
+function renderTable() {
+  const totalPages = Math.ceil(filteredData.length / pageSize);
+  if (currentPage > totalPages) currentPage = totalPages || 1;
+  const start = (currentPage - 1) * pageSize;
+  const page = filteredData.slice(start, start + pageSize);
+  
+  let html = '<table><thead><tr>';
+  html += '<th style="width:40px">#</th>';
+  DISPLAY_COLS.forEach(col => {
+    const arrow = sortCol === col ? (sortAsc ? ' ▲' : ' ▼') : '';
+    html += `<th onclick="sortTable('${col}')">${col}${arrow}</th>`;
+  });
+  html += '<th style="width:60px">操作</th>';
+  html += '</tr></thead><tbody>';
+  
+  page.forEach((d, i) => {
+    const util = getUtilization(d);
+    const cls = getUtilClass(util);
+    html += `<tr data-id="${d._row}" data-idx="${start+i}">`;
+    html += `<td style="color:var(--text2)">${start+i+1}</td>`;
+    DISPLAY_COLS.forEach(col => {
+      let val = getCellValue(d, col);
+      if (col === '材料利用率' && val)
+        val = `<span class="util-badge ${cls}">${val}%</span>`;
+      html += `<td>${val}</td>`;
+    });
+    html += `<td><button class="btn btn-sm btn-primary" onclick="openEditModal(${start+i})">✏️</button></td>`;
+    html += '</tr>';
+  });
+  
+  if (page.length === 0) {
+    html += '<tr><td colspan="' + (DISPLAY_COLS.length + 2) + '" style="text-align:center;padding:40px;color:var(--text2)">暂无数据</td></tr>';
+  }
+  
+  html += '</tbody></table>';
+  document.getElementById('tableWrap').innerHTML = html;
+  
+  // Pagination
+  let pag = '';
+  pag += `<span class="page-info">共 ${filteredData.length} 条，第 ${currentPage}/${totalPages} 页</span>`;
+  pag += `<button class="btn btn-sm btn-secondary" onclick="goPage(1)" ${currentPage===1?'disabled':''}>⏮</button>`;
+  pag += `<button class="btn btn-sm btn-secondary" onclick="goPage(${currentPage-1})" ${currentPage===1?'disabled':''}>◀</button>`;
+  for (let p = Math.max(1, currentPage-2); p <= Math.min(totalPages, currentPage+2); p++) {
+    pag += `<button class="btn btn-sm ${p===currentPage?'btn-primary':'btn-secondary'}" onclick="goPage(${p})">${p}</button>`;
+  }
+  pag += `<button class="btn btn-sm btn-secondary" onclick="goPage(${currentPage+1})" ${currentPage===totalPages?'disabled':''}>▶</button>`;
+  pag += `<button class="btn btn-sm btn-secondary" onclick="goPage(${totalPages})" ${currentPage===totalPages?'disabled':''}>⏭</button>`;
+  document.getElementById('pagination').innerHTML = pag;
+}
+
+function goPage(p) {
+  const totalPages = Math.ceil(filteredData.length / pageSize);
+  if (p < 1 || p > totalPages) return;
+  currentPage = p;
+  renderTable();
+}
+
+function changePageSize() {
+  pageSize = parseInt(document.getElementById('pageSize').value);
+  currentPage = 1;
+  renderTable();
+}
+
+// Modal
+let modalIdx = -1;
+
+function openEditModal(idx) {
+  requireAuth(function() {
+    _doOpenEditModal(idx);
+  });
+}
+function _doOpenEditModal(idx) {
+  modalIdx = idx;
+  const d = filteredData[idx];
+  editingId = allData.indexOf(d);
+  document.getElementById('modalTitle').textContent = '编辑记录 - ' + (d['零件名称'] || '未命名');
+  document.getElementById('btnDelete').style.display = 'inline-flex';
+  const form = document.getElementById('modalForm');
+  form.innerHTML = EDITABLE_COLS.map(col => {
+    const val = (d[col] || '').replace(/"/g, '&quot;');
+    const isNum = NUMERIC_COLS.includes(col);
+    return `<label>${col}<input type="${isNum?'number':'text'}" id="edit_${col}" value="${val}" ${isNum?'step="any"':''}></label>`;
+  }).join('');
+  document.getElementById('editModal').classList.add('show');
+}
+
+function openAddModal() {
+  requireAuth(function() {
+    _doOpenAddModal();
+  });
+}
+function _doOpenAddModal() {
+  modalIdx = -1;
+  editingId = -1;
+  document.getElementById('modalTitle').textContent = '新增记录';
+  document.getElementById('btnDelete').style.display = 'none';
+  const form = document.getElementById('modalForm');
+  form.innerHTML = EDITABLE_COLS.map(col => {
+    const isNum = NUMERIC_COLS.includes(col);
+    return `<label>${col}<input type="${isNum?'number':'text'}" id="edit_${col}" value="" ${isNum?'step="any"':''}></label>`;
+  }).join('');
+  document.getElementById('editModal').classList.add('show');
+}
+
+function closeModal() {
+  document.getElementById('editModal').classList.remove('show');
+  editingId = -1;
+}
+
+function saveRecord() {
+  if (!isUnlocked) { toast('请先解锁编辑模式', true); return; }
+  const obj = {_row: allData.length + 1, _category: 'main'};
+  EDITABLE_COLS.forEach(col => {
+    obj[col] = document.getElementById('edit_'+col).value;
+    // Parse numeric
+    if (NUMERIC_COLS.includes(col) && obj[col]) {
+      const n = parseFloat(obj[col]);
+      if (!isNaN(n)) obj[col+'_num'] = n;
+    }
+  });
+  
+  if (editingId >= 0) {
+    allData[editingId] = {...allData[editingId], ...obj};
+    toast('✅ 记录已更新');
+  } else {
+    allData.push(obj);
+    toast('✅ 新记录已添加');
+  }
+  saveToStorage();
+  filterTable();
+  populateFilters();
+  closeModal();
+}
+
+function deleteRecord() {
+  if (!isUnlocked) { toast('请先解锁编辑模式', true); return; }
+  if (editingId < 0) return;
+  if (!confirm('确定删除此记录吗？此操作不可撤销。')) return;
+  allData.splice(editingId, 1);
+  saveToStorage();
+  filterTable();
+  populateFilters();
+  closeModal();
+  toast('🗑 记录已删除');
+}
+
+function saveAll() {
+  if (!isUnlocked) { toast('请先解锁编辑模式', true); return; }
+  saveToStorage();
+  toast('💾 所有数据已保存到本地存储');
+}
+
+function exportCSV() {
+  const headers = DISPLAY_COLS.filter(c => c !== '材料利用率');
+  const rows = filteredData.map(d => headers.map(h => {
+    let v = (d[h]||'').toString();
+    if (v.includes(',') || v.includes('"') || v.includes('\n')) v = '"' + v.replace(/"/g, '""') + '"';
+    return v;
+  }));
+  const csv = '\uFEFF' + [headers.join(','), ...rows.map(r=>r.join(','))].join('\n');
+  const blob = new Blob([csv], {type:'text/csv;charset=utf-8'});
+  const url = URL.createObjectURL(blob);
+  const a = document.createElement('a');
+  a.href = url; a.download = 'stamping_data.csv'; a.click();
+  URL.revokeObjectURL(url);
+  toast('📥 CSV已导出');
+}
+
+// === Dashboard ===
+function buildDashboard() {
+  const mainData = allData.filter(d => d['_category'] === 'main');
+  
+  // KPIs
+  const total = mainData.length;
+  const models = new Set(); mainData.forEach(d => d['车型'].replace(/\n/g,',').split(',').forEach(m => { const t=m.trim(); if(t) models.add(t); }));
+  const grades = new Set(); mainData.forEach(d => { if(d['牌号'].trim()) grades.add(d['牌号'].trim()); });
+  const utils = mainData.map(d => parseFloat(getUtilization(d))).filter(v => !isNaN(v));
+  const avgUtil = utils.length > 0 ? (utils.reduce((a,b)=>a+b,0)/utils.length).toFixed(1) : 'N/A';
+  const totalTheoryWeight = mainData.reduce((s,d) => s + (d['理论板料重量_num'] || 0), 0).toFixed(1);
+  const totalWeighedWeight = mainData.reduce((s,d) => s + (d['称重板料重量_num'] || 0), 0).toFixed(1);
+  
+  document.getElementById('kpiGrid').innerHTML = `
+    <div class="kpi-card"><div class="kpi-label">总记录数</div><div class="kpi-value">${total}</div><div class="kpi-sub">冲压主料消耗定额记录</div></div>
+    <div class="kpi-card"><div class="kpi-label">车型数量</div><div class="kpi-value">${models.size}</div><div class="kpi-sub">${Array.from(models).slice(0,5).join(', ')}${models.size>5?'...':''}</div></div>
+    <div class="kpi-card"><div class="kpi-label">钢板牌号种类</div><div class="kpi-value">${grades.size}</div><div class="kpi-sub">不同规格材料</div></div>
+    <div class="kpi-card"><div class="kpi-label">平均材料利用率</div><div class="kpi-value">${avgUtil}%</div><div class="kpi-sub">理论零件/板料重量比</div></div>
+    <div class="kpi-card"><div class="kpi-label">理论板料总重</div><div class="kpi-value">${totalTheoryWeight}</div><div class="kpi-sub">kg</div></div>
+    <div class="kpi-card"><div class="kpi-label">称重板料总重</div><div class="kpi-value">${totalWeighedWeight}</div><div class="kpi-sub">kg</div></div>
+  `;
+  
+  // Destroy old charts
+  Object.values(charts).forEach(c => c.destroy());
+  charts = {};
+  
+  const chartColors = ['#38bdf8','#818cf8','#34d399','#fbbf24','#f87171','#c084fc','#fb923c','#22d3ee','#a78bfa','#f472b6'];
+  const chartBg = (alpha) => chartColors.map(c => c.replace(')', `,${alpha})`).replace('rgb','rgba'));
+  
+  // Model distribution
+  const modelCount = {};
+  mainData.forEach(d => {
+    d['车型'].replace(/\n/g,',').split(',').forEach(m => {
+      const t = m.trim(); if (t && t.length < 30) modelCount[t] = (modelCount[t]||0) + 1;
+    });
+  });
+  const modelEntries = Object.entries(modelCount).sort((a,b) => b[1]-a[1]).slice(0,12);
+  charts.model = new Chart(document.getElementById('chartModel'), {
+    type: 'bar', data: {
+      labels: modelEntries.map(e=>e[0]),
+      datasets: [{label:'零件数量',data:modelEntries.map(e=>e[1]),
+        backgroundColor: chartColors.slice(0,modelEntries.length),
+        borderRadius: 6
+      }]
+    },
+    options: { responsive:true, maintainAspectRatio:true,
+      plugins: { legend: { display:false } },
+      scales: { y: { beginAtZero:true, grid:{color:'rgba(148,163,184,.1)'}, ticks:{color:'#94a3b8'} }, x: { ticks:{color:'#94a3b8',maxRotation:45} } }
+    }
+  });
+  
+  // Grade distribution
+  const gradeCount = {};
+  mainData.forEach(d => { if(d['牌号'].trim()) gradeCount[d['牌号'].trim()] = (gradeCount[d['牌号'].trim()]||0)+1; });
+  const gradeEntries = Object.entries(gradeCount).sort((a,b) => b[1]-a[1]);
+  charts.grade = new Chart(document.getElementById('chartGrade'), {
+    type: 'doughnut', data: {
+      labels: gradeEntries.map(e=>e[0]),
+      datasets: [{data:gradeEntries.map(e=>e[1]),backgroundColor:chartColors.concat(chartColors.map(c=>c+'88')).slice(0,gradeEntries.length)}]
+    },
+    options: { responsive:true, maintainAspectRatio:true,
+      plugins: { legend: { position:'right', labels:{color:'#94a3b8',font:{size:11},padding:12} } }
+    }
+  });
+  
+  // Mill distribution
+  const millCount = {};
+  mainData.forEach(d => {
+    const mill = d['钢厂'].trim();
+    if (mill) {
+      const simple = mill.replace(/\n.*/,'').replace(/（.*/,'').trim();
+      millCount[simple] = (millCount[simple]||0)+1;
+    }
+  });
+  const millEntries = Object.entries(millCount).sort((a,b) => b[1]-a[1]);
+  charts.mill = new Chart(document.getElementById('chartMill'), {
+    type: 'bar', data: {
+      labels: millEntries.map(e=>e[0]),
+      datasets: [{label:'零件数量',data:millEntries.map(e=>e[1]),
+        backgroundColor: chartColors.slice(0,millEntries.length),
+        borderRadius: 6
+      }]
+    },
+    options: { indexAxis:'y', responsive:true, maintainAspectRatio:true,
+      plugins: { legend: { display:false } },
+      scales: { x: { beginAtZero:true, grid:{color:'rgba(148,163,184,.1)'}, ticks:{color:'#94a3b8'} }, y: { ticks:{color:'#94a3b8'} } }
+    }
+  });
+  
+  // Thickness distribution
+  const thickCount = {};
+  mainData.forEach(d => {
+    if (d['厚度_mm_num']) {
+      const t = d['厚度_mm_num'].toFixed(2);
+      thickCount[t] = (thickCount[t]||0)+1;
+    }
+  });
+  const thickEntries = Object.entries(thickCount).sort((a,b) => parseFloat(a[0])-parseFloat(b[0]));
+  charts.thickness = new Chart(document.getElementById('chartThickness'), {
+    type: 'bar', data: {
+      labels: thickEntries.map(e=>e[0]+'mm'),
+      datasets: [{label:'零件数量',data:thickEntries.map(e=>e[1]),
+        backgroundColor: thickEntries.map((_,i) => chartColors[i % chartColors.length]),
+        borderRadius: 6
+      }]
+    },
+    options: { responsive:true, maintainAspectRatio:true,
+      plugins: { legend: { display:false } },
+      scales: { y: { beginAtZero:true, grid:{color:'rgba(148,163,184,.1)'}, ticks:{color:'#94a3b8'} }, x: { ticks:{color:'#94a3b8'} } }
+    }
+  });
+  
+  // Weight comparison
+  const weightData = mainData.filter(d => d['理论板料重量_num'] && d['称重板料重量_num']).slice(0,15);
+  charts.weight = new Chart(document.getElementById('chartWeight'), {
+    type: 'bar', data: {
+      labels: weightData.map(d => (d['零件名称']||'').substring(0,12)),
+      datasets: [
+        {label:'理论板料重量(kg)',data:weightData.map(d=>d['理论板料重量_num']),backgroundColor:'rgba(56,189,248,.6)',borderRadius:4},
+        {label:'称重板料重量(kg)',data:weightData.map(d=>d['称重板料重量_num']),backgroundColor:'rgba(129,140,248,.6)',borderRadius:4}
+      ]
+    },
+    options: { responsive:true, maintainAspectRatio:true,
+      plugins: { legend: { labels:{color:'#94a3b8',usePointStyle:true} } },
+      scales: { y: { beginAtZero:true, grid:{color:'rgba(148,163,184,.1)'}, ticks:{color:'#94a3b8'} }, x: { ticks:{color:'#94a3b8',maxRotation:45} } }
+    }
+  });
+  
+  // Utilization distribution
+  const utilRanges = {'<40%':0,'40-50%':0,'50-60%':0,'60-70%':0,'70-80%':0,'>80%':0};
+  utils.forEach(u => {
+    if (u < 40) utilRanges['<40%']++;
+    else if (u < 50) utilRanges['40-50%']++;
+    else if (u < 60) utilRanges['50-60%']++;
+    else if (u < 70) utilRanges['60-70%']++;
+    else if (u < 80) utilRanges['70-80%']++;
+    else utilRanges['>80%']++;
+  });
+  charts.utilization = new Chart(document.getElementById('chartUtilization'), {
+    type: 'polarArea', data: {
+      labels: Object.keys(utilRanges),
+      datasets: [{data:Object.values(utilRanges),backgroundColor:['rgba(248,113,113,.6)','rgba(251,191,36,.6)','rgba(56,189,248,.6)','rgba(129,140,248,.6)','rgba(52,211,153,.6)','rgba(192,132,252,.6)']}]
+    },
+    options: { responsive:true, maintainAspectRatio:true,
+      plugins: { legend: { position:'bottom', labels:{color:'#94a3b8',font:{size:11}} } },
+      scales: { r: { grid:{color:'rgba(148,163,184,.15)'}, ticks:{color:'#94a3b8',backdropColor:'transparent'} } }
+    }
+  });
+}
+
+// Kanban
+function buildKanban() {
+  const groups = {};
+  allData.forEach(d => {
+    const pss = d['PSS'].trim() || '未分类';
+    if (!groups[pss]) groups[pss] = [];
+    groups[pss].push(d);
+  });
+  
+  const sorted = Object.entries(groups).sort((a,b) => parseInt(a[0]) - parseInt(b[0]));
+  let html = '';
+  sorted.forEach(([pss, items]) => {
+    html += `<div class="kanban-col"><h3>🔧 PSS ${pss} <span style="color:var(--text2);font-weight:400">(${items.length}件)</span></h3>`;
+    items.forEach(d => {
+      const util = getUtilization(d);
+      const cls = getUtilClass(util);
+      html += `<div class="kanban-item" onclick="openEditModal(${allData.indexOf(d)})" title="点击编辑">
+        <strong>${d['零件名称'] || '未命名'}</strong><br>
+        <span style="color:var(--text2);font-size:11px">${d['车型']} | ${d['牌号']} | ${d['厚度_mm']}mm</span>
+        ${util ? `<br><span class="util-badge ${cls}">利用率 ${util}%</span>` : ''}
+      </div>`;
+    });
+    html += '</div>';
+  });
+  if (sorted.length === 0) html = '<div style="text-align:center;padding:40px;color:var(--text2);grid-column:1/-1">暂无数据</div>';
+  document.getElementById('kanbanGrid').innerHTML = html;
+}
+
+// Tab switching
+function switchTab(tab) {
+  document.querySelectorAll('.tab').forEach(t => t.classList.remove('active'));
+  document.querySelectorAll('.tab-content').forEach(c => c.classList.remove('active'));
+  document.getElementById('tab-'+tab).classList.add('active');
+  event.target.classList.add('active');
+  if (tab === 'dashboard') buildDashboard();
+  if (tab === 'kanban') buildKanban();
+}
+
+// Init
+loadData();
+populateFilters();
+filterTable();
+
+// Close modal on overlay click
+document.getElementById('editModal').addEventListener('click', function(e) {
+  if (e.target === this) closeModal();
+});
+
+// Keyboard shortcuts
+document.addEventListener('keydown', function(e) {
+  if (e.key === 'Escape') { closeModal(); closePwdModal(); }
+  if (e.key === 'Enter' && document.getElementById('pwdOverlay').classList.contains('show')) { verifyPassword(); }
+  if (e.ctrlKey && e.key === 's') { e.preventDefault(); saveAll(); }
+  if (e.ctrlKey && e.key === 'f') { e.preventDefault(); document.getElementById('searchInput').focus(); }
+});
+</script>
+
+</body></html>
